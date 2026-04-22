@@ -1,0 +1,42 @@
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Box, CssBaseline } from '@mui/material';
+import { ThemeContextProvider } from './ThemeContext';
+import Sidebar from './components/Sidebar';
+import GradeView from './components/GradeView';
+import GeminiChat from './components/GeminiChat';
+import Dashboard from './components/Dashboard';
+import Notifications from './components/Notifications';
+import Settings from './components/Settings';
+
+const App: React.FC = () => {
+  return (
+    <ThemeContextProvider>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: 'background.default' }}>
+        <Sidebar />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            height: '100%',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/grade/:gradeId" element={<GradeView />} />
+            <Route path="/gemini" element={<GeminiChat />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Box>
+      </Box>
+    </ThemeContextProvider>
+  );
+};
+
+export default App;
