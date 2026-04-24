@@ -25,6 +25,7 @@ import {
   CheckCircle as CheckIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
+import AlchemyMixtures from './AlchemyMixtures';
 
 // --- Animations ---
 const bubble = keyframes`
@@ -348,9 +349,26 @@ const GradeView: React.FC = () => {
     fetchNotes(topic);
   };
 
+  const handleMissionComplete = () => {
+    if (!activeTopic) return;
+    setMissionComplete(true);
+    
+    // Save progress to backend
+    fetch('http://localhost:3001/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        grade: parseInt(gradeId || '5'), 
+        topic: activeTopic, 
+        completed: true, 
+        score: 100 // Default score for now
+      }),
+    }).catch(err => console.error('Failed to save progress:', err));
+  };
+
   const renderSimulationContent = () => {
     if (!activeTopic) return null;
-    if (activeTopic.includes("Karışımlar")) return <PotionSimulation sandbox={sandboxMode} />;
+    if (activeTopic.includes("Karışımlar")) return <AlchemyMixtures />;
     if (activeTopic.includes("Asitler")) return <AcidBaseSimulation sandbox={sandboxMode} />;
     if (activeTopic.includes("Basıncı")) return <PressureSimulation sandbox={sandboxMode} />;
     if (activeTopic.includes("İklim")) return <WeatherSimulation sandbox={sandboxMode} />;
@@ -405,7 +423,7 @@ const GradeView: React.FC = () => {
 
           {!missionComplete && (
             <Box sx={{ position: 'absolute', bottom: 20, right: 20 }}>
-               <Button variant="contained" color="success" onClick={() => setMissionComplete(true)}>Görevi Tamamla</Button>
+               <Button variant="contained" color="success" onClick={handleMissionComplete}>Görevi Tamamla</Button>
             </Box>
           )}
 

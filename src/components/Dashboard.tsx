@@ -29,6 +29,14 @@ interface Stats {
   totalTime: number;
   modulesCompleted: number;
   averageScore: number;
+  activeDays: number;
+}
+
+interface ModuleProgress {
+  grade: number;
+  topic: string;
+  completed: number;
+  score: number;
 }
 
 interface LabNote {
@@ -42,6 +50,7 @@ interface LabNote {
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [notes, setNotes] = useState<LabNote[]>([]);
+  const [progress, setProgress] = useState<ModuleProgress[]>([]);
 
   useEffect(() => {
     // Fetch stats
@@ -49,6 +58,12 @@ const Dashboard: React.FC = () => {
       .then((res) => res.json())
       .then((data) => setStats(data))
       .catch((err) => console.error('Failed to fetch stats:', err));
+
+    // Fetch progress
+    fetch('http://localhost:3001/api/progress/all')
+      .then((res) => res.json())
+      .then((data) => setProgress(data))
+      .catch((err) => console.error('Failed to fetch progress:', err));
 
     // Fetch all notes
     fetch('http://localhost:3001/api/notes/all')
@@ -63,8 +78,25 @@ const Dashboard: React.FC = () => {
     { label: 'Toplam Çalışma', value: `${(stats.totalTime / 60).toFixed(1)} Saat`, icon: <TimeIcon color="primary" /> },
     { label: 'Tamamlanan Modüller', value: stats.modulesCompleted, icon: <CompletedIcon color="primary" /> },
     { label: 'Başarı Puanı', value: `%${stats.averageScore}`, icon: <TrophyIcon color="primary" /> },
-    { label: 'Aktiflik Oranı', value: '%88', icon: <TimelineIcon color="primary" /> },
+    { label: 'Aktif Günler', value: stats.activeDays, icon: <TimelineIcon color="primary" /> },
   ];
+
+  // Calculate progress per grade
+  const gradeProgress = [5, 6, 7, 8].map(grade => {
+    const gradeModules = progress.filter(p => p.grade === grade);
+    const totalModules = 2; // Fixed for now based on GradeView.tsx
+    const totalScore = gradeModules.reduce((acc, curr) => acc + curr.score, 0);
+    const percentage = (totalScore / (totalModules * 100)) * 100;
+    
+    const labels: Record<number, string> = {
+      5: '5. Sınıf: Kuvvet ve Hareket',
+      6: '6. Sınıf: Güneş Sistemi',
+      7: '7. Sınıf: Karışımlar',
+      8: '8. Sınıf: Basınç',
+    };
+
+    return { label: labels[grade], value: Math.round(percentage) };
+  });
 
   const badges = [
     { name: 'Hız Tutkunu', desc: 'Bir deneyi 2 dakikadan kısa sürede bitirdi.', icon: <SpeedIcon />, color: '#ef4444' },
@@ -147,12 +179,7 @@ const Dashboard: React.FC = () => {
         <Card sx={{ p: 4 }}>
           <Typography variant="h6" sx={{ mb: 4, fontWeight: 700 }}>Eğitim İlerlemesi</Typography>
           <Stack spacing={4}>
-            {[
-              { label: '5. Sınıf: Kuvvet ve Hareket', value: 85 },
-              { label: '6. Sınıf: Güneş Sistemi', value: 100 },
-              { label: '7. Sınıf: Karışımlar', value: 45 },
-              { label: '8. Sınıf: Basınç', value: 10 },
-            ].map((item) => (
+            {gradeProgress.map((item) => (
               <Box key={item.label}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.label}</Typography>

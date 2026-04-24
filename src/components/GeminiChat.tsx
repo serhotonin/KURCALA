@@ -19,10 +19,6 @@ import {
   DeleteOutlined as DeleteIcon,
   School as TeacherIcon,
 } from '@mui/icons-material';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
 
 interface Message {
   role: 'user' | 'model';
@@ -45,7 +41,7 @@ const GeminiChat: React.FC = () => {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || !apiKey) return;
+    if (!input.trim()) return;
 
     const userMessage: Message = { role: 'user', text: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -53,27 +49,24 @@ const GeminiChat: React.FC = () => {
     setLoading(true);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-      const chat = model.startChat({
-        history: messages.map(m => ({
-          role: m.role,
-          parts: [{ text: m.text }],
-        })),
+      // SECURE: Now calling local backend proxy instead of Google SDK directly
+      const response = await fetch('http://localhost:3001/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: input,
+          history: messages,
+          socratic: socraticMode
+        })
       });
 
-      // Socratic instruction injected invisibly
-      const promptToSend = socraticMode 
-        ? `ÖNEMLİ PEDAGOJİK TALİMAT: Sen AETHER Labs'in Sokratik bir öğretmenisin. Öğrenciye ASLA doğrudan cevap verme. Ona ipuçları ver ve düşünmesini sağlayacak sorular sorarak cevabı kendisinin bulmasını sağla. Öğrencinin sorusu: ${input}` 
-        : input;
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
 
-      const result = await chat.sendMessage(promptToSend);
-      const response = await result.response;
-      const text = response.text();
-
-      setMessages((prev) => [...prev, { role: 'model', text }]);
-    } catch (error) {
+      setMessages((prev) => [...prev, { role: 'model', text: data.text }]);
+    } catch (error: any) {
       console.error("Gemini API Error:", error);
-      setMessages((prev) => [...prev, { role: 'model', text: 'Sistem hatası: API bağlantısı kurulamadı. Lütfen sistem yöneticinizle iletişime geçin.' }]);
+      setMessages((prev) => [...prev, { role: 'model', text: `Hata: ${error.message || 'Sunucuyla bağlantı kurulamadı.'}` }]);
     } finally {
       setLoading(false);
     }
