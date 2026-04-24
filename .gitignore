@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
+=======
+
+.env
+server/database.db
+backend.log
+vite.log
+>>>>>>> 2f23365 (Güneş Sistemi deneyi güncellemeleri ve iyileştirmeler)

@@ -26,6 +26,10 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material';
 import AlchemyMixtures from './AlchemyMixtures';
+<<<<<<< HEAD
+=======
+import SolarSystemSimulation from './SolarSystemSimulation';
+>>>>>>> 2f23365 (Güneş Sistemi deneyi güncellemeleri ve iyileştirmeler)
 
 // --- Animations ---
 const bubble = keyframes`
@@ -369,6 +373,10 @@ const GradeView: React.FC = () => {
   const renderSimulationContent = () => {
     if (!activeTopic) return null;
     if (activeTopic.includes("Karışımlar")) return <AlchemyMixtures />;
+<<<<<<< HEAD
+=======
+    if (activeTopic.includes("Güneş Sistemi")) return <SolarSystemSimulation />;
+>>>>>>> 2f23365 (Güneş Sistemi deneyi güncellemeleri ve iyileştirmeler)
     if (activeTopic.includes("Asitler")) return <AcidBaseSimulation sandbox={sandboxMode} />;
     if (activeTopic.includes("Basıncı")) return <PressureSimulation sandbox={sandboxMode} />;
     if (activeTopic.includes("İklim")) return <WeatherSimulation sandbox={sandboxMode} />;
