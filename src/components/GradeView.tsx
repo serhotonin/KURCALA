@@ -26,10 +26,7 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material';
 import AlchemyMixtures from './AlchemyMixtures';
-<<<<<<< HEAD
-=======
 import SolarSystemSimulation from './SolarSystemSimulation';
->>>>>>> 2f23365 (Güneş Sistemi deneyi güncellemeleri ve iyileştirmeler)
 
 // --- Animations ---
 const bubble = keyframes`
