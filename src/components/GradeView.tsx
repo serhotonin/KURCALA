@@ -29,6 +29,8 @@ import {
 
 // --- Grade 5-6 Components ---
 import SolarSystemSimulation from './Grade5-6/SolarSystemSimulation';
+import DarkNeighborhoodSimulation from './Grade5-6/DarkNeighborhoodSimulation';
+import CircuitSimulation from './Grade5-6/CircuitSimulation';
 
 // --- Grade 7-8 Components ---
 import AlchemyMixtures from './Grade7-8/AlchemyMixtures';
@@ -155,6 +157,9 @@ const GradeView: React.FC = () => {
     if (!activeTopic) return null;
     if (activeTopic.includes("Karışımlar")) return <AlchemyMixtures />;
     if (activeTopic.includes("Güneş Sistemi")) return <SolarSystemSimulation />;
+    if (activeTopic.includes("Elektrik Devreleri")) {
+      return sandboxMode ? <CircuitSimulation /> : <DarkNeighborhoodSimulation />;
+    }
     if (activeTopic.includes("Asitler")) return <AcidBaseSimulation sandbox={sandboxMode} />;
     if (activeTopic.includes("Basıncı")) return <PressureSimulation sandbox={sandboxMode} />;
     if (activeTopic.includes("İklim")) return <WeatherSimulation sandbox={sandboxMode} />;
@@ -259,7 +264,7 @@ const GradeView: React.FC = () => {
             <Divider />
 
             <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={activeTopic.includes("Elektrik") ? 4 : 6}>
                     <Button 
                         variant="contained" 
                         size="large" 
@@ -271,7 +276,25 @@ const GradeView: React.FC = () => {
                         Deneye Başla
                     </Button>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {activeTopic.includes("Elektrik") && (
+                  <Grid item xs={12} sm={4}>
+                      <Button 
+                          variant="contained" 
+                          size="large" 
+                          fullWidth 
+                          color="secondary"
+                          onClick={() => {
+                            setSandboxMode(true);
+                            setViewState('simulation');
+                          }}
+                          sx={{ py: 2.5, borderRadius: 4, fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 20px -5px rgba(0,0,0,0.2)' }}
+                          startIcon={<ScienceIcon />}
+                      >
+                          Özgür Mod
+                      </Button>
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={activeTopic.includes("Elektrik") ? 4 : 6}>
                     <Button 
                         variant="outlined" 
                         size="large" 
