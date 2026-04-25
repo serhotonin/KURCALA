@@ -10,8 +10,16 @@ const db = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// --- AI Setup (Server Side for Security) ---
+// --- AI Setup ---
 const genAI = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY);
+const WEATHER_API_KEY = process.env.VITE_OPENWEATHER_API_KEY;
+
+const TURKISH_CITIES = [
+  "Ankara", "Izmir", "Bursa", "Antalya", "Adana", "Konya", "Gaziantep", 
+  "Sanliurfa", "Kocaeli", "Mersin", "Diyarbakir", "Hatay", "Manisa", 
+  "Kayseri", "Samsun", "Balikesir", "Kahramanmaras", "Van", "Aydin", 
+  "Denizli", "Sakarya", "Erzurum", "Trabzon", "Malatya"
+];
 
 // 1. Security Headers
 app.use(helmet());
@@ -33,7 +41,7 @@ const globalLimiter = rateLimit({
 });
 app.use('/api/', globalLimiter);
 
-// Special AI Limiter (more restrictive to save tokens/prevent abuse)
+// Special AI Limiter
 const aiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 5,
@@ -50,6 +58,48 @@ const validate = (req, res, next) => {
 };
 
 // --- API Endpoints ---
+
+// WEATHER PROXY
+app.get('/api/weather/compare', async (req, res) => {
+  try {
+    const esenlerUrl = `https://api.openweathermap.org/data/2.5/weather?q=Esenler,TR&appid=${WEATHER_API_KEY}&units=metric&lang=tr`;
+    const randomCity = TURKISH_CITIES[Math.floor(Math.random() * TURKISH_CITIES.length)];
+    const randomCityUrl = `https://api.openweathermap.org/data/2.5/weather?q=${randomCity},TR&appid=${WEATHER_API_KEY}&units=metric&lang=tr`;
+
+    const [esenlerRes, randomRes] = await Promise.all([
+      fetch(esenlerUrl).then(r => r.json()),
+      fetch(randomCityUrl).then(r => r.json())
+    ]);
+
+    if (esenlerRes.cod !== 200 || randomRes.cod !== 200) {
+      return res.status(500).json({ error: 'Hava durumu verileri alınamadı.' });
+    }
+
+    res.json({
+      esenler: {
+        name: "Esenler, İstanbul",
+        temp: esenlerRes.main.temp,
+        pressure: esenlerRes.main.pressure,
+        humidity: esenlerRes.main.humidity,
+        description: esenlerRes.weather[0].description,
+        icon: esenlerRes.weather[0].icon,
+        windSpeed: esenlerRes.wind.speed
+      },
+      random: {
+        name: randomRes.name,
+        temp: randomRes.main.temp,
+        pressure: randomRes.main.pressure,
+        humidity: randomRes.main.humidity,
+        description: randomRes.weather[0].description,
+        icon: randomRes.weather[0].icon,
+        windSpeed: randomRes.wind.speed
+      }
+    });
+  } catch (err) {
+    console.error("Weather Proxy Error:", err);
+    res.status(500).json({ error: 'Hava durumu servisine erişilemiyor.' });
+  }
+});
 
 // SECURE AI CHAT PROXY
 app.post('/api/ai/chat', [
@@ -113,7 +163,6 @@ app.post('/api/progress', [
   try {
     const { grade, topic, completed, score } = req.body;
     
-    // Check if progress already exists for this topic
     const existing = db.prepare('SELECT id FROM ModuleProgress WHERE topic = ?').get(topic);
     
     if (existing) {
@@ -124,7 +173,6 @@ app.post('/api/progress', [
         .run(grade, topic, completed ? 1 : 0, score);
     }
 
-    // Update global stats
     if (completed) {
       db.prepare('UPDATE UserStats SET modulesCompleted = modulesCompleted + 1, totalTime = totalTime + 15 WHERE id = 1').run();
     }
@@ -221,5 +269,5 @@ app.post('/api/notes', [
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
 app.listen(PORT, () => {
-  console.log(`SECURE Backend running on http://localhost:${PORT}`);
+  console.log(`SECURE Backend running on port ${PORT}`);
 });
