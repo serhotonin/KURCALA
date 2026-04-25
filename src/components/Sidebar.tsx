@@ -11,6 +11,7 @@ import {
   Box,
   Avatar,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   School as SchoolIcon,
@@ -21,13 +22,21 @@ import {
   NotificationsNone as NotificationsIcon,
   Brightness4 as DarkIcon,
   Brightness7 as LightIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeContext } from '../ThemeContext';
 
 const drawerWidth = 280;
+const collapsedWidth = 88;
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useThemeContext();
@@ -39,167 +48,218 @@ const Sidebar: React.FC = () => {
     { label: '8. Sınıf', path: '/grade/8' },
   ];
 
+  const currentWidth = collapsed ? collapsedWidth : drawerWidth;
+
   return (
     <Drawer
       variant="permanent"
       anchor="left"
       sx={{
-        width: drawerWidth,
+        width: currentWidth,
         flexShrink: 0,
+        whiteSpace: 'nowrap',
+        transition: 'width 0.3s ease',
         '& .MuiDrawer-paper': {
-          width: drawerWidth,
+          width: currentWidth,
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
+          transition: 'width 0.3s ease',
+          overflowX: 'hidden',
+          borderRight: '1px solid',
+          borderColor: 'divider',
         },
       }}
     >
-      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 32, height: 32, backgroundColor: 'primary.main', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography sx={{ color: mode === 'light' ? 'white' : 'black', fontWeight: 800, fontSize: '1.2rem' }}>A</Typography>
+      {/* Header Area */}
+      <Box sx={{ 
+        p: 2, 
+        height: 80, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: collapsed ? 'center' : 'space-between' 
+      }}>
+        {!collapsed && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 32, height: 32, backgroundColor: 'primary.main', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Typography sx={{ color: 'white', fontWeight: 800, fontSize: '1.2rem' }}>A</Typography>
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>
+                AETHER
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: 0.5 }}>
+                LABS
+              </Typography>
+            </Box>
           </Box>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>
-              AETHER
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: 0.5 }}>
-              LABORATUVARLARI
-            </Typography>
-          </Box>
-        </Box>
-        <IconButton onClick={toggleTheme} size="small">
-          {mode === 'dark' ? <LightIcon fontSize="small" /> : <DarkIcon fontSize="small" />}
+        )}
+
+        <IconButton onClick={onToggle} size="small" sx={{ 
+            ml: collapsed ? 0 : 1,
+            bgcolor: 'action.hover',
+            '&:hover': { bgcolor: 'primary.main', color: 'white' }
+        }}>
+          {collapsed ? <MenuIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
         </IconButton>
       </Box>
 
-      <Box sx={{ px: 2, mb: 2 }}>
-        <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2 }}>
-          ANA MENÜ
-        </Typography>
-        <List sx={{ mt: 0.5 }}>
-          <ListItem disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              onClick={() => navigate('/')}
-              selected={location.pathname === '/'}
-              sx={{
-                borderRadius: 2,
-                '&.Mui-selected': { backgroundColor: 'rgba(0,0,0,0.04)' }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}><DashboardIcon fontSize="small" /></ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>Panel</Typography>
-                }
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
+      <Divider />
 
-        <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
-          MÜFREDAT
-        </Typography>
-        <List sx={{ mt: 0.5 }}>
-          {menuItems.map((item) => (
-            <ListItem key={item.label} disablePadding sx={{ mb: 0.5 }}>
+      {/* Theme Toggle Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+          <Tooltip title={mode === 'dark' ? 'Açık Mod' : 'Koyu Mod'} placement="right">
+            <IconButton onClick={toggleTheme} sx={{ 
+                width: 48, 
+                height: 48, 
+                borderRadius: 3,
+                bgcolor: 'action.hover'
+            }}>
+                {mode === 'dark' ? <LightIcon color="warning" /> : <DarkIcon color="primary" />}
+            </IconButton>
+          </Tooltip>
+      </Box>
+
+      <Box sx={{ px: 2, mt: 1 }}>
+        {!collapsed && (
+          <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2 }}>
+            ANA MENÜ
+          </Typography>
+        )}
+        <List>
+          <Tooltip title={collapsed ? 'Panel' : ''} placement="right">
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
-                onClick={() => navigate(item.path)}
-                selected={location.pathname === item.path}
+                onClick={() => navigate('/')}
+                selected={location.pathname === '/'}
                 sx={{
-                  borderRadius: 2,
-                  '&.Mui-selected': { backgroundColor: 'rgba(0,0,0,0.04)' }
+                  minHeight: 48,
+                  justifyContent: collapsed ? 'center' : 'initial',
+                  borderRadius: 3,
+                  px: 2.5,
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 40 }}><SchoolIcon fontSize="small" /></ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.label}</Typography>
-                  }
-                />
+                <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
+                  <DashboardIcon color={location.pathname === '/' ? 'primary' : 'inherit'} />
+                </ListItemIcon>
+                {!collapsed && <ListItemText primary="Panel" sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
               </ListItemButton>
             </ListItem>
+          </Tooltip>
+        </List>
+
+        {!collapsed && (
+          <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
+            MÜFREDAT
+          </Typography>
+        )}
+        <List>
+          {menuItems.map((item) => (
+            <Tooltip key={item.path} title={collapsed ? item.label : ''} placement="right">
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => navigate(item.path)}
+                  selected={location.pathname === item.path}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: collapsed ? 'center' : 'initial',
+                    borderRadius: 3,
+                    px: 2.5,
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
+                    <SchoolIcon color={location.pathname === item.path ? 'primary' : 'inherit'} />
+                  </ListItemIcon>
+                  {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                </ListItemButton>
+              </ListItem>
+            </Tooltip>
           ))}
         </List>
 
-        <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
-          YAPAY ZEKA
-        </Typography>
-        <List sx={{ mt: 0.5 }}>
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => navigate('/gemini')}
-              selected={location.pathname === '/gemini'}
-              sx={{
-                borderRadius: 2,
-                backgroundColor: location.pathname === '/gemini' ? 'rgba(0,0,0,0.04)' : 'transparent',
-                '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}><GeminiIcon fontSize="small" sx={{ color: 'text.primary' }} /></ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.9rem' }}>
-                    Gemini Asistan
-                  </Typography>
-                }
-              />
-            </ListItemButton>
-          </ListItem>
+        {!collapsed && (
+          <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
+            YAPAY ZEKA
+          </Typography>
+        )}
+        <List>
+          <Tooltip title={collapsed ? 'Gemini Asistan' : ''} placement="right">
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => navigate('/gemini')}
+                selected={location.pathname === '/gemini'}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: collapsed ? 'center' : 'initial',
+                  borderRadius: 3,
+                  px: 2.5,
+                  bgcolor: location.pathname === '/gemini' ? 'primary.main' : 'transparent',
+                  color: location.pathname === '/gemini' ? 'white' : 'inherit',
+                  '&:hover': {
+                    bgcolor: location.pathname === '/gemini' ? 'primary.dark' : 'action.hover',
+                  },
+                  '& .MuiListItemIcon-root': {
+                    color: location.pathname === '/gemini' ? 'white' : 'inherit',
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
+                  <GeminiIcon />
+                </ListItemIcon>
+                {!collapsed && <ListItemText primary="Gemini Asistan" sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 800 }} />}
+              </ListItemButton>
+            </ListItem>
+          </Tooltip>
         </List>
       </Box>
 
       <Box sx={{ flexGrow: 1 }} />
       <Divider />
       
-      <List sx={{ px: 2, py: 1 }}>
-        <ListItem disablePadding sx={{ mb: 0.5 }}>
-          <ListItemButton
-            onClick={() => navigate('/notifications')}
-            selected={location.pathname === '/notifications'}
-            sx={{ borderRadius: 2 }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}><NotificationsIcon fontSize="small" /></ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>Bildirimler</Typography>
-              }
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding sx={{ mb: 0.5 }}>
-          <ListItemButton sx={{ borderRadius: 2 }}>
-            <ListItemIcon sx={{ minWidth: 40 }}><HelpIcon fontSize="small" /></ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>Destek</Typography>
-              }
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => navigate('/settings')}
-            selected={location.pathname === '/settings'}
-            sx={{ borderRadius: 2 }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}><SettingsIcon fontSize="small" /></ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>Ayarlar</Typography>
-              }
-            />
-          </ListItemButton>
-        </ListItem>
-      </List>
+      <Box sx={{ px: 2, py: 2 }}>
+        <List>
+          {[
+            { label: 'Bildirimler', icon: <NotificationsIcon />, path: '/notifications' },
+            { label: 'Ayarlar', icon: <SettingsIcon />, path: '/settings' },
+          ].map((item) => (
+            <Tooltip key={item.path} title={collapsed ? item.label : ''} placement="right">
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => navigate(item.path)}
+                  selected={location.pathname === item.path}
+                  sx={{
+                    minHeight: 44,
+                    justifyContent: collapsed ? 'center' : 'initial',
+                    borderRadius: 3,
+                    px: 2.5,
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 600 }} />}
+                </ListItemButton>
+              </ListItem>
+            </Tooltip>
+          ))}
+        </List>
+      </Box>
+
       <Divider />
 
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Avatar sx={{ width: 36, height: 36, bgcolor: 'secondary.main', fontSize: '1rem' }}>Ö</Avatar>
-        <Box>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>Öğrenci Hesabı</Typography>
-          <Typography variant="caption" color="text.secondary">ogrenci@aether.edu.tr</Typography>
-        </Box>
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'initial', gap: 2 }}>
+        <Avatar sx={{ 
+            width: 40, 
+            height: 40, 
+            bgcolor: 'secondary.main', 
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+        }}>Ö</Avatar>
+        {!collapsed && (
+          <Box sx={{ overflow: 'hidden' }}>
+            <Typography variant="body2" sx={{ fontWeight: 800, whiteSpace: 'nowrap' }}>Öğrenci</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>ogrenci@aether.edu.tr</Typography>
+          </Box>
+        )}
       </Box>
     </Drawer>
   );

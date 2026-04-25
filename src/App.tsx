@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
 import { ThemeContextProvider } from './ThemeContext';
@@ -10,11 +10,13 @@ import Notifications from './components/Notifications';
 import Settings from './components/Settings';
 
 const App: React.FC = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   return (
     <ThemeContextProvider>
       <CssBaseline />
       <Box sx={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: 'background.default' }}>
-        <Sidebar />
+        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
         <Box
           component="main"
           sx={{
@@ -23,6 +25,7 @@ const App: React.FC = () => {
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
+            transition: 'margin-left 0.3s ease',
           }}
         >
           <Routes>
