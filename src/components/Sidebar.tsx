@@ -18,7 +18,6 @@ import {
   Psychology as GeminiIcon,
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
-  HelpOutlined as HelpIcon,
   NotificationsNone as NotificationsIcon,
   Brightness4 as DarkIcon,
   Brightness7 as LightIcon,
@@ -161,46 +160,19 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
           </Tooltip>
       </Box>
 
-      <Box sx={{ px: 2, mt: 1 }}>
-        {!collapsed && (
-          <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2 }}>
-            {t('mainMenu')}
-          </Typography>
-        )}
-        <List>
-          <Tooltip title={collapsed ? t('dashboard') : ''} placement="right">
-            <ListItem disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton
-                onClick={() => navigate('/')}
-                selected={location.pathname === '/'}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: collapsed ? 'center' : 'initial',
-                  borderRadius: 3,
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
-                  <DashboardIcon color={location.pathname === '/' ? 'primary' : 'inherit'} />
-                </ListItemIcon>
-                {!collapsed && <ListItemText primary={t('dashboard')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
-              </ListItemButton>
-            </ListItem>
-          </Tooltip>
-        </List>
-
-        {!collapsed && (
-          <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
-            {t('curriculum')}
-          </Typography>
-        )}
-        <List>
-          {menuItems.map((item) => (
-            <Tooltip key={item.path} title={collapsed ? item.label : ''} placement="right">
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(0,0,0,0.1)', borderRadius: 10 } }}>
+        <Box sx={{ px: 2, mt: 1 }}>
+          {!collapsed && (
+            <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2 }}>
+              {t('mainMenu')}
+            </Typography>
+          )}
+          <List>
+            <Tooltip title={collapsed ? t('dashboard') : ''} placement="right">
               <ListItem disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
-                  onClick={() => navigate(item.path)}
-                  selected={location.pathname === item.path}
+                  onClick={() => navigate('/')}
+                  selected={location.pathname === '/'}
                   sx={{
                     minHeight: 48,
                     justifyContent: collapsed ? 'center' : 'initial',
@@ -209,97 +181,132 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                   }}
                 >
                   <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
-                    <SchoolIcon color={location.pathname === item.path ? 'primary' : 'inherit'} />
+                    <DashboardIcon color={location.pathname === '/' ? 'primary' : 'inherit'} />
                   </ListItemIcon>
-                  {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                  {!collapsed && <ListItemText primary={t('dashboard')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
                 </ListItemButton>
               </ListItem>
             </Tooltip>
-          ))}
-        </List>
+          </List>
 
-        {!collapsed && (
-          <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
-            {t('aiAssistant')}
-          </Typography>
-        )}
-        <List>
-          <Tooltip title={collapsed ? t('geminiAssistant') : ''} placement="right">
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => navigate('/gemini')}
-                selected={location.pathname === '/gemini'}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: collapsed ? 'center' : 'initial',
-                  borderRadius: 3,
-                  px: 2.5,
-                  bgcolor: location.pathname === '/gemini' ? 'primary.main' : 'transparent',
-                  color: location.pathname === '/gemini' ? 'white' : 'inherit',
-                  '&:hover': {
-                    bgcolor: location.pathname === '/gemini' ? 'primary.dark' : 'action.hover',
-                  },
-                  '& .MuiListItemIcon-root': {
-                    color: location.pathname === '/gemini' ? 'white' : 'inherit',
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
-                  <GeminiIcon />
-                </ListItemIcon>
-                {!collapsed && <ListItemText primary={t('geminiAssistant')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 800 }} />}
-              </ListItemButton>
-            </ListItem>
-          </Tooltip>
-        </List>
-      </Box>
+          {!collapsed && (
+            <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
+              {t('curriculum')}
+            </Typography>
+          )}
+          <List>
+            {menuItems.map((item) => (
+              <Tooltip key={item.path} title={collapsed ? item.label : ''} placement="right">
+                <ListItem disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    onClick={() => navigate(item.path)}
+                    selected={location.pathname === item.path}
+                    sx={{
+                      minHeight: 48,
+                      justifyContent: collapsed ? 'center' : 'initial',
+                      borderRadius: 3,
+                      px: 2.5,
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
+                      <SchoolIcon color={location.pathname === item.path ? 'primary' : 'inherit'} />
+                    </ListItemIcon>
+                    {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+            ))}
+          </List>
 
-      <Box sx={{ flexGrow: 1 }} />
-      <Divider />
-      
-      <Box sx={{ px: 2, py: 2 }}>
-        <List>
-          {[
-            { label: t('notifications'), icon: <NotificationsIcon />, path: '/notifications' },
-            { label: t('contactUs'), icon: <ContactIcon />, path: '/contact' },
-            { label: t('settings'), icon: <SettingsIcon />, path: '/settings' },
-          ].map((item) => (
-            <Tooltip key={item.path} title={collapsed ? item.label : ''} placement="right">
-              <ListItem disablePadding sx={{ mb: 0.5 }}>
+          {!collapsed && (
+            <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
+              {t('aiAssistant')}
+            </Typography>
+          )}
+          <List>
+            <Tooltip title={collapsed ? t('geminiAssistant') : ''} placement="right">
+              <ListItem disablePadding>
                 <ListItemButton
-                  onClick={() => navigate(item.path)}
-                  selected={location.pathname === item.path}
+                  onClick={() => navigate('/gemini')}
+                  selected={location.pathname === '/gemini'}
                   sx={{
-                    minHeight: 44,
+                    minHeight: 48,
                     justifyContent: collapsed ? 'center' : 'initial',
                     borderRadius: 3,
                     px: 2.5,
+                    bgcolor: location.pathname === '/gemini' ? 'primary.main' : 'transparent',
+                    color: location.pathname === '/gemini' ? 'white' : 'inherit',
+                    '&:hover': {
+                      bgcolor: location.pathname === '/gemini' ? 'primary.dark' : 'action.hover',
+                    },
+                    '& .MuiListItemIcon-root': {
+                      color: location.pathname === '/gemini' ? 'white' : 'inherit',
+                    }
                   }}
                 >
                   <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
-                    {item.icon}
+                    <GeminiIcon />
                   </ListItemIcon>
-                  {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 600 }} />}
+                  {!collapsed && <ListItemText primary={t('geminiAssistant')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 800 }} />}
                 </ListItemButton>
               </ListItem>
             </Tooltip>
-          ))}
-        </List>
+          </List>
+
+          {/* Moved Platform Options into the scrollable list */}
+          {!collapsed && (
+            <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
+              {(t('language') === 'tr' ? 'PLATFORM' : 'PLATFORM')}
+            </Typography>
+          )}
+          <List>
+            {[
+              { label: t('notifications'), icon: <NotificationsIcon />, path: '/notifications' },
+              { label: t('contactUs'), icon: <ContactIcon />, path: '/contact' },
+              { label: t('settings'), icon: <SettingsIcon />, path: '/settings' },
+            ].map((item) => (
+              <Tooltip key={item.path} title={collapsed ? item.label : ''} placement="right">
+                <ListItem disablePadding sx={{ mb: 0.2 }}>
+                  <ListItemButton
+                    onClick={() => navigate(item.path)}
+                    selected={location.pathname === item.path}
+                    sx={{
+                      minHeight: 48,
+                      justifyContent: collapsed ? 'center' : 'initial',
+                      borderRadius: 3,
+                      px: 2.5,
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+            ))}
+          </List>
+        </Box>
       </Box>
 
       <Divider />
 
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'initial', gap: 2 }}>
-        <Avatar sx={{ 
-            width: 40, 
-            height: 40, 
-            bgcolor: 'secondary.main', 
-            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-        }}>{t('student').charAt(0)}</Avatar>
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'initial', gap: 1.5 }}>
+        <Avatar 
+          src="https://upload.wikimedia.org/wikipedia/tr/b/b3/Y%C4%B1ld%C4%B1z_Teknik_%C3%9Cniversitesi_Logo.png"
+          sx={{ 
+            width: 36, 
+            height: 36, 
+            bgcolor: 'white', 
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            '& img': { objectFit: 'contain', p: 0.5 }
+          }} 
+        />
         {!collapsed && (
           <Box sx={{ overflow: 'hidden' }}>
-            <Typography variant="body2" sx={{ fontWeight: 800, whiteSpace: 'nowrap' }}>{t('student')}</Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>ogrenci@kurcala.edu.tr</Typography>
+            <Typography variant="caption" sx={{ fontWeight: 800, whiteSpace: 'nowrap', display: 'block', lineHeight: 1.2 }}>
+                Yıldız Teknik Üniversitesi
+            </Typography>
           </Box>
         )}
       </Box>
