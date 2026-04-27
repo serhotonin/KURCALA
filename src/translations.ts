@@ -34,12 +34,13 @@ export const translations = {
     noNotes: 'Henüz kayıtlı bir notunuz bulunmuyor.',
     hours: 'Saat',
     opened: 'Açıldı',
+    min: 'dk',
     
     // Badges
     badgeSpeedLabel: 'Hız Tutkunu',
     badgeSpeedDesc: 'Bir deneyi 2 dakikadan kısa sürede bitirdi.',
-    badgeChaosLabel: 'Kaos Teorisyeni',
-    badgeChaosDesc: 'Serbest modda sistem sınırlarını zorladı.',
+    badgeChaosLabel: 'Keşif Öncüsü',
+    badgeChaosDesc: 'Yeni bir üniteyi ilk kez başarıyla tamamladı.',
     badgeMeticulousLabel: 'Titiz Araştırmacı',
     badgeMeticulousDesc: 'Laboratuvar defterine 10+ gözlem yazdı.',
     badgeFirstSparkLabel: 'İlk Kıvılcım',

@@ -16,9 +16,9 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     fetch('http://localhost:3001/api/settings')
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : null)
       .then(data => {
-        if (data.theme) setMode(data.theme);
+        if (data && data.theme) setMode(data.theme);
       })
       .catch(err => console.error('Failed to load theme settings:', err));
   }, []);

@@ -12,17 +12,29 @@ import {
   List,
   ListItem,
   Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  alpha,
+  styled,
+  useTheme
 } from '@mui/material';
 import {
   Timeline as TimelineIcon,
   AssignmentTurnedIn as CompletedIcon,
   EmojiEvents as TrophyIcon,
   AccessTime as TimeIcon,
-  Speed as SpeedIcon,
-  Cyclone as ChaosIcon,
-  AutoAwesome as RareIcon,
-  LocalFireDepartment as HotIcon,
   Science as ScienceIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  LocalFireDepartment as HotIcon,
+  Opacity as WaterIcon,
+  WbSunny as SunIcon,
+  Thunderstorm as StormIcon
 } from '@mui/icons-material';
 import { useLanguage } from '../LanguageContext';
 
@@ -48,45 +60,104 @@ interface LabNote {
   timestamp: string;
 }
 
+const BadgeCard = styled(Card, {
+  shouldForwardProp: (prop) => prop !== 'earned' && prop !== 'badgeColor',
+})<{ earned: boolean; badgeColor: string }>(({ theme, earned, badgeColor }) => ({
+  padding: theme.spacing(3),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  textAlign: 'center',
+  cursor: 'pointer',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  border: '2px solid',
+  borderColor: earned ? alpha(badgeColor, 0.3) : 'transparent',
+  background: earned 
+    ? `linear-gradient(145deg, ${alpha(badgeColor, 0.05)}, ${alpha(badgeColor, 0.01)})`
+    : theme.palette.action.hover,
+  filter: earned ? 'none' : 'grayscale(1) opacity(0.5)',
+  '&:hover': {
+    transform: earned ? 'translateY(-8px)' : 'none',
+    borderColor: earned ? badgeColor : 'transparent',
+    boxShadow: earned ? `0 12px 24px -10px ${alpha(badgeColor, 0.5)}` : 'none',
+  }
+}));
+
 const Dashboard: React.FC = () => {
   const { t, language } = useLanguage();
+  const theme = useTheme();
   const [stats, setStats] = useState<Stats | null>(null);
   const [notes, setNotes] = useState<LabNote[]>([]);
   const [progress, setProgress] = useState<ModuleProgress[]>([]);
+  
+  // Edit State
+  const [editingNote, setEditingNote] = useState<LabNote | null>(null);
+  const [editH, setEditH] = useState('');
+  const [editO, setEditO] = useState('');
+
+  const refreshData = () => {
+    fetch('http://localhost:3001/api/stats')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => data && setStats(data))
+      .catch(err => console.error(err));
+      
+    fetch('http://localhost:3001/api/progress/all')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => Array.isArray(data) ? setProgress(data) : setProgress([]))
+      .catch(err => {
+        console.error(err);
+        setProgress([]);
+      });
+
+    fetch('http://localhost:3001/api/notes/all')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => Array.isArray(data) ? setNotes(data) : setNotes([]))
+      .catch(err => console.error(err));
+  };
 
   useEffect(() => {
-    // Fetch stats
-    fetch('http://localhost:3001/api/stats')
-      .then((res) => res.json())
-      .then((data) => setStats(data))
-      .catch((err) => console.error('Failed to fetch stats:', err));
-
-    // Fetch progress
-    fetch('http://localhost:3001/api/progress/all')
-      .then((res) => res.json())
-      .then((data) => setProgress(data))
-      .catch((err) => console.error('Failed to fetch progress:', err));
-
-    // Fetch all notes
-    fetch('http://localhost:3001/api/notes/all')
-      .then((res) => res.json())
-      .then((data) => setNotes(data))
-      .catch((err) => console.error('Failed to fetch all notes:', err));
+    refreshData();
   }, []);
 
-  if (!stats) return <LinearProgress />;
+  const handleDeleteNote = (id: number) => {
+    if (window.confirm(language === 'tr' ? 'Bu notu silmek istediğinize emin misiniz?' : 'Are you sure you want to delete this note?')) {
+      fetch(`http://localhost:3001/api/notes/${id}`, { method: 'DELETE' })
+        .then(() => refreshData());
+    }
+  };
 
-  const statCards = [
-    { label: t('totalStudy'), value: `${(stats.totalTime / 60).toFixed(1)} ${t('hours')}`, icon: <TimeIcon color="primary" /> },
-    { label: t('completedModules'), value: stats.modulesCompleted, icon: <CompletedIcon color="primary" /> },
-    { label: t('successScore'), value: `%${stats.averageScore}`, icon: <TrophyIcon color="primary" /> },
-    { label: t('activeDays'), value: stats.activeDays, icon: <TimelineIcon color="primary" /> },
+  const handleUpdateNote = () => {
+    if (!editingNote) return;
+    fetch(`http://localhost:3001/api/notes/${editingNote.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hypothesis: editH, observation: editO }),
+    }).then(() => {
+      setEditingNote(null);
+      refreshData();
+    });
+  };
+
+  // Badge earned logic
+  const isEarned = (topic: string) => Array.isArray(progress) && progress.some(p => p.topic.toLowerCase().includes(topic.toLowerCase()) && p.completed);
+
+  const badges = [
+    { id: 'alchemist', name: language === 'tr' ? 'Simya Ustası' : 'Master Alchemist', desc: language === 'tr' ? 'Karışımlar ünitesini tamamladı.' : 'Completed Mixtures module.', icon: <WaterIcon />, color: '#3b82f6', earned: isEarned('Karışımlar') || isEarned('Mixtures') },
+    { id: 'astronomer', name: language === 'tr' ? 'Gök Bilimci' : 'Astronomer', desc: language === 'tr' ? 'Güneş Sistemi ünitesini tamamladı.' : 'Completed Solar System module.', icon: <SunIcon />, color: '#f59e0b', earned: isEarned('Güneş Sistemi') || isEarned('Solar System') },
+    { id: 'spark', name: language === 'tr' ? 'İlk Kıvılcım' : 'First Spark', desc: language === 'tr' ? 'Devreler ünitesini tamamladı.' : 'Completed Circuits module.', icon: <HotIcon />, color: '#ef4444', earned: isEarned('Devreler') || isEarned('Circuits') },
+    { id: 'weather', name: language === 'tr' ? 'Hava Kahini' : 'Weather Prophet', desc: language === 'tr' ? 'İklim ünitesini tamamladı.' : 'Completed Weather module.', icon: <StormIcon />, color: '#8b5cf6', earned: isEarned('İklim') || isEarned('Weather') },
   ];
 
-  // Calculate progress per grade
+  const statCards = [
+    { label: t('totalStudy'), value: stats ? `${(stats.totalTime / 60).toFixed(1)} ${t('hours')}` : '0.0', icon: <TimeIcon color="primary" /> },
+    { label: t('completedModules'), value: stats ? stats.modulesCompleted : 0, icon: <CompletedIcon color="primary" /> },
+    { label: t('successScore'), value: stats ? `%${stats.averageScore}` : '%0', icon: <TrophyIcon color="primary" /> },
+    { label: t('activeDays'), value: stats ? stats.activeDays : 1, icon: <TimelineIcon color="primary" /> },
+  ];
+
   const gradeProgress = [5, 6, 7, 8].map(grade => {
-    const gradeModules = progress.filter(p => p.grade === grade);
-    const totalModules = 2; // Fixed for now based on GradeView.tsx
+    const gradeModules = Array.isArray(progress) ? progress.filter(p => p.grade === grade) : [];
+    const totalModules = 2;
     const totalScore = gradeModules.reduce((acc, curr) => acc + curr.score, 0);
     const percentage = (totalScore / (totalModules * 100)) * 100;
     
@@ -100,125 +171,124 @@ const Dashboard: React.FC = () => {
     return { label: labels[grade], value: Math.round(percentage) };
   });
 
-  const badges = [
-    { name: t('badgeSpeedLabel'), desc: t('badgeSpeedDesc'), icon: <SpeedIcon />, color: '#ef4444' },
-    { name: t('badgeChaosLabel'), desc: t('badgeChaosDesc'), icon: <ChaosIcon />, color: '#8b5cf6' },
-    { name: t('badgeMeticulousLabel'), desc: t('badgeMeticulousDesc'), icon: <RareIcon />, color: '#f59e0b' },
-    { name: t('badgeFirstSparkLabel'), desc: t('badgeFirstSparkDesc'), icon: <HotIcon />, color: '#10b981' },
-  ];
-
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Box sx={{ mb: 6 }}>
-        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>{t('dashboard')}</Typography>
-        <Typography variant="h6" color="text.secondary">{t('performanceData')}</Typography>
+        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, letterSpacing: -1.5 }}>{t('dashboard')}</Typography>
+        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>{t('performanceData')}</Typography>
       </Box>
 
-      {/* Stats Grid */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(4, 1fr)' },
-          gap: 3,
-          mb: 6
-        }}
-      >
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3, mb: 8 }}>
         {statCards.map((card) => (
-          <Card key={card.label} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Card key={card.label} sx={{ p: 3, borderRadius: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <Box sx={{ p: 1, borderRadius: 1, backgroundColor: 'action.hover', display: 'flex' }}>
+              <Box sx={{ p: 1, borderRadius: 2, backgroundColor: alpha(theme.palette.primary.main, 0.1), display: 'flex' }}>
                 {card.icon}
               </Box>
-              <Typography variant="overline" sx={{ fontWeight: 700, color: 'text.secondary' }}>{card.label}</Typography>
+              <Typography variant="overline" sx={{ fontWeight: 800, color: 'text.secondary' }}>{card.label}</Typography>
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>{card.value}</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 900 }}>{card.value}</Typography>
           </Card>
         ))}
       </Box>
 
-      {/* Badges Section */}
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>{t('earnedBadges')}</Typography>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' },
-          gap: 3,
-          mb: 6
-        }}
-      >
+      <Typography variant="h5" sx={{ fontWeight: 900, mb: 3, letterSpacing: -0.5 }}>{t('earnedBadges')}</Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' }, gap: 3, mb: 8 }}>
         {badges.map((badge) => (
-          <Tooltip title={badge.desc} key={badge.name} arrow>
-            <Card 
-              sx={{ 
-                p: 3, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                '&:hover': { transform: 'translateY(-5px)', borderColor: badge.color, boxShadow: `0 10px 20px -10px ${badge.color}` }
-              }}
-            >
-              <Avatar sx={{ bgcolor: badge.color, width: 56, height: 56, mb: 2, boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-                {badge.icon}
+          <Tooltip title={badge.earned ? badge.desc : (language === 'tr' ? 'Kilidi açmak için ilgili modülü tamamlayın' : 'Complete the module to unlock')} key={badge.id} arrow>
+            <BadgeCard earned={badge.earned} badgeColor={badge.color}>
+              <Avatar 
+                sx={{ 
+                  bgcolor: badge.earned ? badge.color : 'action.disabledBackground', 
+                  width: 64, 
+                  height: 64, 
+                  mb: 2, 
+                  boxShadow: badge.earned ? `0 8px 24px ${alpha(badge.color, 0.4)}` : 'none',
+                }}
+              >
+                {React.cloneElement(badge.icon as React.ReactElement, { sx: { fontSize: 32 } })}
               </Avatar>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{badge.name}</Typography>
-              <Typography variant="caption" color="text.secondary">{t('opened')}</Typography>
-            </Card>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: badge.earned ? 'text.primary' : 'text.disabled' }}>{badge.name}</Typography>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: badge.earned ? badge.color : 'text.disabled', mt: 0.5 }}>
+                {badge.earned ? t('opened').toUpperCase() : (language === 'tr' ? 'KİLİTLİ' : 'LOCKED')}
+              </Typography>
+            </BadgeCard>
           </Tooltip>
         ))}
       </Box>
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-          gap: 4
-        }}
-      >
-        {/* Progress Card */}
-        <Card sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ mb: 4, fontWeight: 700 }}>{t('trainingProgress')}</Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1.2fr' }, gap: 4 }}>
+        <Card sx={{ p: 4, borderRadius: 5 }}>
+          <Typography variant="h6" sx={{ mb: 4, fontWeight: 900 }}>{t('trainingProgress')}</Typography>
           <Stack spacing={4}>
             {gradeProgress.map((item) => (
               <Box key={item.label}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.label}</Typography>
-                  <Typography variant="body2" color="text.secondary">{item.value}%</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 800 }}>{item.label}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 800 }}>{item.value}%</Typography>
                 </Box>
-                <LinearProgress variant="determinate" value={item.value} sx={{ height: 8, borderRadius: 4 }} />
+                <LinearProgress variant="determinate" value={item.value} sx={{ height: 10, borderRadius: 5, bgcolor: alpha(theme.palette.primary.main, 0.1) }} />
               </Box>
             ))}
           </Stack>
         </Card>
 
-        {/* Global Notes Card */}
-        <Card sx={{ p: 4, display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="h6" sx={{ mb: 4, fontWeight: 700 }}>{t('allLabNotes')}</Typography>
-          <Box sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 400, pr: 1 }}>
+        <Card sx={{ p: 4, borderRadius: 5, boxShadow: '0 10px 40px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 900 }}>{t('allLabNotes')}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Button 
+                size="small" 
+                color="error" 
+                onClick={() => {
+                  if (window.confirm(language === 'tr' ? 'Tüm notları silmek istediğinize emin misiniz?' : 'Are you sure you want to clear all notes?')) {
+                    fetch('http://localhost:3001/api/notes/all', { method: 'DELETE' }).then(() => refreshData());
+                  }
+                }}
+                sx={{ fontWeight: 800, textTransform: 'none', mr: 1 }}
+              >
+                {language === 'tr' ? 'Hepsini Sil' : 'Clear All'}
+              </Button>
+              <Chip label={`${notes.length} ${language === 'tr' ? 'Kayıt' : 'Records'}`} size="small" sx={{ fontWeight: 800 }} />
+            </Box>
+          </Box>
+          <Box sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 500, pr: 1 }}>
              {notes.length === 0 ? (
-               <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <ScienceIcon sx={{ fontSize: 48, color: 'divider', mb: 2 }} />
-                  <Typography color="text.secondary">{t('noNotes')}</Typography>
+               <Box sx={{ textAlign: 'center', py: 8, opacity: 0.3 }}>
+                  <ScienceIcon sx={{ fontSize: 64, mb: 2 }} />
+                  <Typography variant="h6" fontWeight={800}>{t('noNotes')}</Typography>
                </Box>
              ) : (
                <List sx={{ p: 0 }}>
                  {notes.map((n, idx) => (
                    <React.Fragment key={n.id}>
-                     <ListItem sx={{ px: 0, py: 2, flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mb: 1 }}>
-                           <Chip label={n.topic} size="small" variant="outlined" color="primary" sx={{ fontWeight: 700, borderRadius: 1 }} />
-                           <Typography variant="caption" color="text.secondary">
-                              {new Date(n.timestamp).toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US')}
-                           </Typography>
+                     <ListItem sx={{ px: 0, py: 3, flexDirection: 'column', alignItems: 'flex-start', '&:hover .note-actions': { opacity: 1 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mb: 2 }}>
+                           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                             <Chip label={n.topic} size="small" color="primary" sx={{ fontWeight: 900, borderRadius: 1.5 }} />
+                             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                                {new Date(n.timestamp).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}
+                             </Typography>
+                           </Box>
+                           <Box className="note-actions" sx={{ opacity: 0, transition: 'opacity 0.2s', display: 'flex', gap: 0.5 }}>
+                              <IconButton size="small" onClick={() => {
+                                setEditingNote(n);
+                                setEditH(n.hypothesis);
+                                setEditO(n.observation);
+                              }}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton size="small" color="error" onClick={() => handleDeleteNote(n.id)}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                           </Box>
                         </Box>
-                        <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 2, width: '100%' }}>
-                           <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>H: {n.hypothesis}</Typography>
-                           <Typography variant="body2" color="text.secondary">G: {n.observation}</Typography>
+                        <Box sx={{ bgcolor: alpha(theme.palette.primary.main, 0.03), p: 2.5, borderRadius: 4, width: '100%', border: '1px solid', borderColor: alpha(theme.palette.primary.main, 0.08) }}>
+                           <Typography variant="body2" sx={{ fontWeight: 900, mb: 1, color: 'primary.main', letterSpacing: 0.5 }}>HİPOTEZ: {n.hypothesis}</Typography>
+                           <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', lineHeight: 1.7 }}>GÖZLEM: {n.observation}</Typography>
                         </Box>
                      </ListItem>
-                     {idx < notes.length - 1 && <Divider sx={{ opacity: 0.5 }} />}
+                     {idx < notes.length - 1 && <Divider sx={{ my: 1, opacity: 0.3 }} />}
                    </React.Fragment>
                  ))}
                </List>
@@ -226,6 +296,18 @@ const Dashboard: React.FC = () => {
           </Box>
         </Card>
       </Box>
+
+      <Dialog open={!!editingNote} onClose={() => setEditingNote(null)} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 6, p: 2 } }}>
+        <DialogTitle sx={{ fontWeight: 900, fontSize: '1.5rem' }}>Gözlemi Düzenle</DialogTitle>
+        <DialogContent>
+          <TextField fullWidth label="Hipotez" multiline rows={2} value={editH} onChange={e => setEditH(e.target.value)} sx={{ mt: 2, mb: 3 }} variant="outlined" />
+          <TextField fullWidth label="Gözlem" multiline rows={4} value={editO} onChange={e => setEditO(e.target.value)} variant="outlined" />
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setEditingNote(null)} sx={{ fontWeight: 800 }}>Vazgeç</Button>
+          <Button onClick={handleUpdateNote} variant="contained" sx={{ fontWeight: 900, px: 4, borderRadius: 3, boxShadow: '0 8px 20px -5px rgba(0,0,0,0.2)' }}>Değişiklikleri Kaydet</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

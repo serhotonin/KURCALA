@@ -12,7 +12,9 @@ import {
   Divider,
   Paper,
   CircularProgress,
+  LinearProgress,
   IconButton,
+  Chip,
   useTheme,
   styled,
   alpha
@@ -24,9 +26,13 @@ import {
   MenuBook as NotebookIcon,
   CheckCircle as CheckIcon,
   Close as CloseIcon,
-  ArrowForward as ArrowIcon
+  ArrowForward as ArrowIcon,
+  AccessTime as TimeIcon,
+  HistoryEdu as NoteIcon,
+  Save as SaveIcon
 } from '@mui/icons-material';
 import { useLanguage } from '../LanguageContext';
+import { Drawer, TextField } from '@mui/material';
 
 // --- Grade 5-6 Components ---
 import SolarSystemSimulation from './Grade5-6/SolarSystemSimulation';
@@ -75,6 +81,31 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   boxShadow: `0 8px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
 }));
 
+const LabDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-paper': {
+    width: 450,
+    backgroundColor: theme.palette.mode === 'dark' ? '#0f172a' : '#ffffff',
+    backgroundImage: theme.palette.mode === 'dark' 
+      ? 'radial-gradient(at 0% 0%, rgba(30, 41, 59, 0.7) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.7) 0, transparent 50%)'
+      : 'none',
+    borderLeft: `1px solid ${theme.palette.divider}`,
+    padding: theme.spacing(4),
+  }
+}));
+
+const NotePaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2.5),
+  borderRadius: '20px',
+  marginBottom: theme.spacing(2),
+  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: alpha(theme.palette.background.default, 0.5),
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    borderColor: theme.palette.primary.main,
+    transform: 'translateX(4px)'
+  }
+}));
+
 interface LabNote {
   id?: number;
   topic: string;
@@ -88,13 +119,6 @@ const GradeView: React.FC = () => {
   const theme = useTheme();
   const { t } = useLanguage();
   
-  const topics = {
-    '5': [t('topics.friction'), t('topics.circuits')],
-    '6': [t('topics.solar'), t('topics.density')],
-    '7': [t('topics.mixtures'), t('topics.acidBase')],
-    '8': [t('topics.pressure'), t('topics.weather')],
-  }[gradeId || '5'] || [];
-
   const [viewState, setViewState] = useState<'list' | 'briefing' | 'simulation'>('list');
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [notebookOpen, setNotebookOpen] = useState(false);
@@ -104,6 +128,21 @@ const GradeView: React.FC = () => {
   const [missionComplete, setMissionComplete] = useState(false);
   const [sandboxMode, setSandboxMode] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
+
+  // Reset state when grade changes
+  useEffect(() => {
+    setViewState('list');
+    setActiveTopic(null);
+    setMissionComplete(false);
+    setNotebookOpen(false);
+  }, [gradeId]);
+
+  const topics = {
+    '5': [t('topics.friction'), t('topics.circuits')],
+    '6': [t('topics.solar'), t('topics.density')],
+    '7': [t('topics.mixtures'), t('topics.acidBase')],
+    '8': [t('topics.pressure'), t('topics.weather')],
+  }[gradeId || '5'] || [];
 
   const fetchNotes = (topic: string) => {
     fetch(`http://localhost:3001/api/notes/${encodeURIComponent(topic)}`)
@@ -158,22 +197,24 @@ const GradeView: React.FC = () => {
   const renderSimulationContent = () => {
     if (!activeTopic) return null;
     
-    // Check by split part for localization robustness
-    const isMixtures = activeTopic.includes(t('topics.mixtures', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.mixtures', { lng: 'en' }).split(' (')[0]);
-    const isSolar = activeTopic.includes(t('topics.solar', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.solar', { lng: 'en' }).split(' (')[0]);
-    const isCircuits = activeTopic.includes(t('topics.circuits', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.circuits', { lng: 'en' }).split(' (')[0]);
-    const isAcidBase = activeTopic.includes(t('topics.acidBase', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.acidBase', { lng: 'en' }).split(' (')[0]);
-    const isPressure = activeTopic.includes(t('topics.pressure', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.pressure', { lng: 'en' }).split(' (')[0]);
-    const isWeather = activeTopic.includes(t('topics.weather', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.weather', { lng: 'en' }).split(' (')[0]);
+    // Check by translation keys instead of fragile string matching if possible,
+    // but we currently store localized names in activeTopic.
+    // Let's use the actual translation values to compare.
+    const t_mixtures = t('topics.mixtures');
+    const t_solar = t('topics.solar');
+    const t_circuits = t('topics.circuits');
+    const t_acidBase = t('topics.acidBase');
+    const t_pressure = t('topics.pressure');
+    const t_weather = t('topics.weather');
 
-    if (isMixtures) return <AlchemyMixtures />;
-    if (isSolar) return <SolarSystemSimulation />;
-    if (isCircuits) {
+    if (activeTopic === t_mixtures) return <AlchemyMixtures />;
+    if (activeTopic === t_solar) return <SolarSystemSimulation />;
+    if (activeTopic === t_circuits) {
       return sandboxMode ? <CircuitSimulation /> : <DarkNeighborhoodSimulation />;
     }
-    if (isAcidBase) return <AcidBaseSimulation sandbox={sandboxMode} />;
-    if (isPressure) return <PressureSimulation sandbox={sandboxMode} />;
-    if (isWeather) return <WeatherSimulation sandbox={sandboxMode} />;
+    if (activeTopic === t_acidBase) return <AcidBaseSimulation sandbox={sandboxMode} />;
+    if (activeTopic === t_pressure) return <PressureSimulation sandbox={sandboxMode} />;
+    if (activeTopic === t_weather) return <WeatherSimulation sandbox={sandboxMode} />;
     
     return (
        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, py: 10 }}>
@@ -210,9 +251,13 @@ const GradeView: React.FC = () => {
                   <ScienceIcon sx={{ fontSize: 32 }} />
                 </IconWrapper>
                 <CardContent sx={{ p: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h4" sx={{ fontWeight: 900, mb: 2, lineHeight: 1.1, fontSize: '1.8rem' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 900, mb: 1, lineHeight: 1.1, fontSize: '1.8rem' }}>
                     {topic}
                   </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5, color: 'text.secondary' }}>
+                    <TimeIcon sx={{ fontSize: 18 }} />
+                    <Typography variant="caption" sx={{ fontWeight: 700 }}>5 {t('min') || 'min'}</Typography>
+                  </Box>
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 4, fontWeight: 500, lineHeight: 1.6 }}>
                     {t('topicDesc').replace('{topic}', topic.split(' (')[0])}
                   </Typography>
@@ -263,9 +308,12 @@ const GradeView: React.FC = () => {
           </Box>
           
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <Box>
-                <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>{t('experimentTopic')}</Typography>
-                <Typography variant="h3" sx={{ fontWeight: 950, mt: 1, letterSpacing: -1 }}>{activeTopic}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                    <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>{t('experimentTopic')}</Typography>
+                    <Typography variant="h3" sx={{ fontWeight: 950, mt: 1, letterSpacing: -1 }}>{activeTopic}</Typography>
+                </Box>
+                <Chip icon={<TimeIcon />} label={`5 ${t('min') || 'min'}`} sx={{ fontWeight: 900, borderRadius: 2, bgcolor: 'action.hover' }} />
             </Box>
 
             <Typography variant="body1" sx={{ fontSize: '1.3rem', lineHeight: 1.8, color: 'text.secondary', fontStyle: 'italic', borderLeft: '4px solid', pl: 3, borderColor: 'primary.light' }}>
@@ -394,6 +442,76 @@ const GradeView: React.FC = () => {
           </Button>
         </Paper>
       )}
+
+      <LabDrawer anchor="right" open={notebookOpen} onClose={() => setNotebookOpen(false)}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ p: 1, bgcolor: 'primary.main', borderRadius: 2, color: 'white', display: 'flex' }}>
+              <NoteIcon />
+            </Box>
+            <Typography variant="h5" sx={{ fontWeight: 900 }}>{t('labNotebook')}</Typography>
+          </Box>
+          <IconButton onClick={() => setNotebookOpen(false)}><CloseIcon /></IconButton>
+        </Box>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box sx={{ p: 3, bgcolor: 'action.hover', borderRadius: '24px', border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="overline" sx={{ fontWeight: 900, color: 'primary.main', mb: 2, display: 'block' }}>YENİ GÖZLEM</Typography>
+            <TextField 
+              fullWidth 
+              multiline 
+              rows={2} 
+              placeholder="Hipotezini yaz..." 
+              value={hypothesis} 
+              onChange={e => setHypothesis(e.target.value)}
+              variant="standard"
+              InputProps={{ disableUnderline: true, sx: { fontSize: '1.1rem', fontWeight: 600 } }}
+              sx={{ mb: 2 }}
+            />
+            <Divider sx={{ my: 2 }} />
+            <TextField 
+              fullWidth 
+              multiline 
+              rows={4} 
+              placeholder="Neler gözlemliyorsun?" 
+              value={observation} 
+              onChange={e => setObservation(e.target.value)}
+              variant="standard"
+              InputProps={{ disableUnderline: true, sx: { fontSize: '1rem' } }}
+            />
+            <Button 
+              variant="contained" 
+              fullWidth 
+              onClick={saveNote} 
+              disabled={savingNote || !hypothesis || !observation} 
+              sx={{ mt: 3, py: 1.5, borderRadius: 3, fontWeight: 900 }}
+              startIcon={savingNote ? <CircularProgress size={20} /> : <SaveIcon />}
+            >
+              {savingNote ? 'Kaydediliyor...' : 'Gözlemi Kaydet'}
+            </Button>
+          </Box>
+
+          <Box>
+            <Typography variant="overline" sx={{ fontWeight: 900, color: 'text.secondary', mb: 2, display: 'block' }}>GEÇMİŞ NOTLARIN</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', maxHeight: '400px', overflowY: 'auto', pr: 1 }}>
+              {prevNotes.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4, fontStyle: 'italic' }}>
+                  Henüz bir not kaydetmediniz.
+                </Typography>
+              ) : prevNotes.map(n => (
+                <NotePaper key={n.id} elevation={0}>
+                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main' }}>AKADEMİK KAYIT</Typography>
+                      <Typography variant="caption" color="text.secondary">{new Date(n.timestamp || '').toLocaleString('tr-TR')}</Typography>
+                   </Box>
+                   <Typography variant="body2" sx={{ fontWeight: 800, mb: 1 }}>H: {n.hypothesis}</Typography>
+                   <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>G: {n.observation}</Typography>
+                </NotePaper>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      </LabDrawer>
     </Box>
   );
 };

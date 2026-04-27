@@ -12,6 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // --- AI Setup ---
+console.log('API Key present:', !!process.env.VITE_GEMINI_API_KEY);
 const genAI = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY);
 const WEATHER_API_KEY = process.env.VITE_OPENWEATHER_API_KEY;
 
@@ -35,9 +36,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '10kb' }));
-
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../dist')));
 
 // 3. Rate Limiting
 const globalLimiter = rateLimit({
@@ -65,9 +63,135 @@ const validate = (req, res, next) => {
 
 // --- API Endpoints ---
 
+// STATS
+app.get('/api/stats', (req, res) => {
+  try {
+    const stats = db.prepare('SELECT * FROM UserStats LIMIT 1').get();
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: 'İstatistikler alınamadı.' });
+  }
+});
+
+// PROGRESS
+app.get('/api/progress/all', (req, res) => {
+  try {
+    const progress = db.prepare('SELECT * FROM ModuleProgress').all();
+    res.json(progress);
+  } catch (err) {
+    res.status(500).json({ error: 'İlerleme verileri alınamadı.' });
+  }
+});
+
+app.post('/api/progress', [
+  body('grade').isInt(),
+  body('topic').isString().notEmpty(),
+  body('completed').isBoolean(),
+  body('score').isNumeric(),
+  validate
+], (req, res) => {
+  try {
+    const { grade, topic, completed, score } = req.body;
+    const existing = db.prepare('SELECT id FROM ModuleProgress WHERE topic = ?').get(topic);
+    
+    if (existing) {
+      db.prepare('UPDATE ModuleProgress SET completed = ?, score = ?, lastAttempt = CURRENT_TIMESTAMP WHERE id = ?')
+        .run(completed ? 1 : 0, score, existing.id);
+    } else {
+      db.prepare('INSERT INTO ModuleProgress (grade, topic, completed, score) VALUES (?, ?, ?, ?)')
+        .run(grade, topic, completed ? 1 : 0, score);
+    }
+    
+    // Update global stats
+    const totalModules = db.prepare('SELECT COUNT(*) as count FROM ModuleProgress WHERE completed = 1').get().count;
+    const avgScore = db.prepare('SELECT AVG(score) as avg FROM ModuleProgress WHERE completed = 1').get().avg || 0;
+    
+    db.prepare('UPDATE UserStats SET modulesCompleted = ?, averageScore = ? WHERE id = 1')
+      .run(totalModules, Math.round(avgScore));
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'İlerleme kaydedilemedi.' });
+  }
+});
+
+// SETTINGS
+app.get('/api/settings', (req, res) => {
+  try {
+    const settings = db.prepare('SELECT * FROM Settings LIMIT 1').get();
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ error: 'Ayarlar alınamadı.' });
+  }
+});
+
+// NOTIFICATIONS
+app.get('/api/notifications', (req, res) => {
+  try {
+    const notifications = db.prepare('SELECT * FROM Notifications ORDER BY timestamp DESC').all();
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ error: 'Bildirimler alınamadı.' });
+  }
+});
+
+app.post('/api/notifications/:id/read', [
+  param('id').isInt(),
+  validate
+], (req, res) => {
+  try {
+    db.prepare('UPDATE Notifications SET read = 1 WHERE id = ?').run(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Bildirim güncellenemedi.' });
+  }
+});
+
+app.post('/api/settings', [
+  body('theme').optional().isIn(['light', 'dark']),
+  body('emailNotifications').optional().isBoolean(),
+  validate
+], (req, res) => {
+  try {
+    const { theme, emailNotifications } = req.body;
+    if (theme !== undefined) {
+      db.prepare('UPDATE Settings SET theme = ? WHERE id = 1').run(theme);
+    }
+    if (emailNotifications !== undefined) {
+      db.prepare('UPDATE Settings SET emailNotifications = ? WHERE id = 1').run(emailNotifications ? 1 : 0);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Ayarlar güncellenemedi.' });
+  }
+});
+
+app.patch('/api/settings', [
+  body('theme').optional().isIn(['light', 'dark']),
+  body('emailNotifications').optional().isBoolean(),
+  validate
+], (req, res) => {
+  try {
+    const { theme, emailNotifications } = req.body;
+    if (theme !== undefined) {
+      db.prepare('UPDATE Settings SET theme = ? WHERE id = 1').run(theme);
+    }
+    if (emailNotifications !== undefined) {
+      db.prepare('UPDATE Settings SET emailNotifications = ? WHERE id = 1').run(emailNotifications ? 1 : 0);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Ayarlar güncellenemedi.' });
+  }
+});
+
 // WEATHER PROXY
 app.get('/api/weather/compare', async (req, res) => {
   try {
+    if (typeof fetch === 'undefined') {
+       throw new Error('Fetch is not defined in this environment. Please use a newer Node.js version or install node-fetch.');
+    }
     const esenlerUrl = `https://api.openweathermap.org/data/2.5/weather?q=Esenler,TR&appid=${WEATHER_API_KEY}&units=metric&lang=tr`;
     const randomCity = TURKISH_CITIES[Math.floor(Math.random() * TURKISH_CITIES.length)];
     const randomCityUrl = `https://api.openweathermap.org/data/2.5/weather?q=${randomCity},TR&appid=${WEATHER_API_KEY}&units=metric&lang=tr`;
@@ -115,124 +239,46 @@ app.post('/api/ai/chat', [
   body('socratic').isBoolean(),
   validate
 ], async (req, res) => {
+  console.log('Received AI chat request:', req.body.message);
+  
+  if (!process.env.VITE_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+    return res.status(500).json({ error: 'Yapay zeka API anahtarı yapılandırılmamış.' });
+  }
+
   try {
     const { message, history, socratic } = req.body;
     
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    console.log('Starting chat with model gemini-1.5-flash');
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const chat = model.startChat({
       history: history.map(m => ({
-        role: m.role,
+        role: m.role === 'user' ? 'user' : 'model',
         parts: [{ text: m.text }],
       })),
     });
 
     const promptToSend = socratic 
-      ? `ÖNEMLİ PEDAGOJİK TALİMAT: Sen KURCALA Labs'in Sokratik bir öğretmenisin. Öğrenciye ASLA doğrudan cevap verme. Ona ipuçları ver ve düşünmesini sağlayacak sorular sorarak cevabı kendisinin bulmasını sağla. Öğrencinin sorusu: ${message}`
+      ? `ÖNEMLİ: Sen KURCALA Labs'in bilimsel rehberisin. 
+         TEMEL KURALLAR:
+         1. ASLA doğrudan cevap verme. 
+         2. Öğrenciye cevabı bulduracak sorular sor.
+         3. Zararlı veya etik dışı hiçbir içerik üretme.
+         4. Sadece fen bilimleri ve deneylerle ilgili konularda yardımcı ol.
+         5. Yanıtların kısa, teşvik edici ve merak uyandırıcı olsun.
+         Öğrencinin sorusu: ${message}`
  
-      : message;
+      : `Sen KURCALA Labs bilim asistanısın. Kısa ve bilimsel gerçeklere dayalı cevaplar ver. Zararlı içerikten kaçın. Soru: ${message}`;
 
+    console.log('Sending message to Gemini...');
     const result = await chat.sendMessage(promptToSend);
+    console.log('Gemini responded.');
     const response = await result.response;
     const text = response.text();
 
     res.json({ text });
   } catch (err) {
-    console.error("AI Proxy Error:", err);
+    console.error("AI Proxy Error DETAILED:", err);
     res.status(500).json({ error: 'Yapay zeka servisine erişilemiyor.' });
-  }
-});
-
-app.get('/api/stats', (req, res) => {
-  try {
-    const stats = db.prepare('SELECT totalTime, modulesCompleted, averageScore, activeDays FROM UserStats LIMIT 1').get();
-    res.json(stats);
-  } catch (err) {
-    res.status(500).json({ error: 'Veriler alınamadı.' });
-  }
-});
-
-app.get('/api/progress/all', (req, res) => {
-  try {
-    const progress = db.prepare('SELECT grade, topic, completed, score FROM ModuleProgress').all();
-    res.json(progress);
-  } catch (err) {
-    res.status(500).json({ error: 'İlerleme verileri alınamadı.' });
-  }
-});
-
-app.post('/api/progress', [
-  body('grade').isInt(),
-  body('topic').isString().notEmpty(),
-  body('completed').isBoolean(),
-  body('score').isFloat(),
-  validate
-], (req, res) => {
-  try {
-    const { grade, topic, completed, score } = req.body;
-    
-    const existing = db.prepare('SELECT id FROM ModuleProgress WHERE topic = ?').get(topic);
-    
-    if (existing) {
-      db.prepare('UPDATE ModuleProgress SET completed = ?, score = ?, lastAttempt = CURRENT_TIMESTAMP WHERE topic = ?')
-        .run(completed ? 1 : 0, score, topic);
-    } else {
-      db.prepare('INSERT INTO ModuleProgress (grade, topic, completed, score) VALUES (?, ?, ?, ?)')
-        .run(grade, topic, completed ? 1 : 0, score);
-    }
-
-    if (completed) {
-      db.prepare('UPDATE UserStats SET modulesCompleted = modulesCompleted + 1, totalTime = totalTime + 15 WHERE id = 1').run();
-    }
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Progress update error:", err);
-    res.status(500).json({ error: 'İlerleme kaydedilemedi.' });
-  }
-});
-
-app.get('/api/notifications', (req, res) => {
-  try {
-    const notifications = db.prepare('SELECT id, message, timestamp, read FROM Notifications ORDER BY timestamp DESC').all();
-    res.json(notifications);
-  } catch (err) {
-    res.status(500).json({ error: 'Bildirimler alınamadı.' });
-  }
-});
-
-app.post('/api/notifications/:id/read', [
-  param('id').isInt(),
-  validate
-], (req, res) => {
-  try {
-    db.prepare('UPDATE Notifications SET read = 1 WHERE id = ?').run(req.params.id);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'İşlem başarısız.' });
-  }
-});
-
-app.get('/api/settings', (req, res) => {
-  try {
-    const settings = db.prepare('SELECT theme, emailNotifications FROM Settings LIMIT 1').get();
-    res.json(settings);
-  } catch (err) {
-    res.status(500).json({ error: 'Ayarlar yüklenemedi.' });
-  }
-});
-
-app.post('/api/settings', [
-  body('theme').isIn(['light', 'dark']),
-  body('emailNotifications').isBoolean(),
-  validate
-], (req, res) => {
-  try {
-    const { theme, emailNotifications } = req.body;
-    db.prepare('UPDATE Settings SET theme = ?, emailNotifications = ? WHERE id = 1')
-      .run(theme, emailNotifications ? 1 : 0);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Kaydetme hatası.' });
   }
 });
 
@@ -242,6 +288,43 @@ app.get('/api/notes/all', (req, res) => {
     res.json(notes);
   } catch (err) {
     res.status(500).json({ error: 'Notlar alınamadı.' });
+  }
+});
+
+app.delete('/api/notes/all', (req, res) => {
+  try {
+    db.prepare('DELETE FROM LabNotes').run();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Notlar silinemedi.' });
+  }
+});
+
+app.delete('/api/notes/:id', [
+  param('id').isInt(),
+  validate
+], (req, res) => {
+  try {
+    db.prepare('DELETE FROM LabNotes WHERE id = ?').run(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Not silinemedi.' });
+  }
+});
+
+app.patch('/api/notes/:id', [
+  param('id').isInt(),
+  body('hypothesis').isString().trim().escape(),
+  body('observation').isString().trim().escape(),
+  validate
+], (req, res) => {
+  try {
+    const { hypothesis, observation } = req.body;
+    db.prepare('UPDATE LabNotes SET hypothesis = ?, observation = ? WHERE id = ?')
+      .run(hypothesis, observation, req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Not güncellenemedi.' });
   }
 });
 
@@ -273,11 +356,14 @@ app.post('/api/notes', [
   }
 });
 
+app.use(express.static(path.join(__dirname, '../dist')));
+
 // All other GET requests not handled before will return the React app
-app.get('/{*path}', (req, res) => {
-  if (!req.path.startsWith('/api')) {
+app.get('*', (req, res) => {
+  if (!req.url.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   } else {
+    console.log('404 on API route:', req.url);
     res.status(404).json({ error: 'API route not found' });
   }
 });

@@ -56,20 +56,14 @@ const sizzle = keyframes`
 const PotionSimulation: React.FC<{ sandbox: boolean }> = ({ sandbox }) => {
   const [level, setLevel] = useState(0);
   const [color, setColor] = useState('rgba(255,255,255,0.1)');
-  const [chaos, setChaos] = useState(false);
 
   const addPotion = (c: string) => {
-    if (chaos) return;
     setLevel(prev => Math.min(prev + 20, 100));
     setColor(c);
-    if (sandbox && level >= 80) {
-      setChaos(true);
-      setTimeout(() => { setChaos(false); setLevel(0); setColor('rgba(255,255,255,0.1)'); }, 3000);
-    }
   };
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', height: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', animation: chaos ? `${shake} 0.5s infinite` : 'none' }}>
+    <Box sx={{ position: 'relative', width: '100%', height: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       {/* Background Elements */}
       <Box sx={{ position: 'absolute', bottom: 20, width: 200, height: 40, bgcolor: '#442b1d', borderRadius: '50% 50% 10% 10%', zIndex: 1 }} />
       

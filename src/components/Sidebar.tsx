@@ -183,7 +183,15 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                   <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
                     <DashboardIcon color={location.pathname === '/' ? 'primary' : 'inherit'} />
                   </ListItemIcon>
-                  {!collapsed && <ListItemText primary={t('dashboard')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                  {!collapsed && (
+                    <ListItemText 
+                      primary={
+                        <Typography variant="body1" sx={{ fontWeight: 700, opacity: 1 }}>
+                          {t('dashboard')}
+                        </Typography>
+                      } 
+                    />
+                  )}
                 </ListItemButton>
               </ListItem>
             </Tooltip>
@@ -211,7 +219,15 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                     <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
                       <SchoolIcon color={location.pathname === item.path ? 'primary' : 'inherit'} />
                     </ListItemIcon>
-                    {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                    {!collapsed && (
+                      <ListItemText 
+                        primary={
+                          <Typography variant="body1" sx={{ fontWeight: 700, opacity: 1 }}>
+                            {item.label}
+                          </Typography>
+                        } 
+                      />
+                    )}
                   </ListItemButton>
                 </ListItem>
               </Tooltip>
@@ -247,7 +263,15 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                   <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
                     <GeminiIcon />
                   </ListItemIcon>
-                  {!collapsed && <ListItemText primary={t('geminiAssistant')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 800 }} />}
+                  {!collapsed && (
+                    <ListItemText 
+                      primary={
+                        <Typography variant="body1" sx={{ fontWeight: 800, opacity: 1 }}>
+                          {t('geminiAssistant')}
+                        </Typography>
+                      } 
+                    />
+                  )}
                 </ListItemButton>
               </ListItem>
             </Tooltip>
@@ -280,7 +304,15 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                     <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
                       {item.icon}
                     </ListItemIcon>
-                    {!collapsed && <ListItemText primary={item.label} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                    {!collapsed && (
+                      <ListItemText 
+                        primary={
+                          <Typography variant="body1" sx={{ fontWeight: 700, opacity: 1 }}>
+                            {item.label}
+                          </Typography>
+                        } 
+                      />
+                    )}
                   </ListItemButton>
                 </ListItem>
               </Tooltip>

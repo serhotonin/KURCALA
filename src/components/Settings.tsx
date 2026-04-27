@@ -30,10 +30,13 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     fetch('http://localhost:3001/api/settings')
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : null)
       .then((data) => {
-        setEmailNotify(data.emailNotifications === 1);
-      });
+        if (data) {
+          setEmailNotify(data.emailNotifications === 1);
+        }
+      })
+      .catch(err => console.error('Failed to load settings:', err));
   }, []);
 
   const handleToggleEmail = () => {
