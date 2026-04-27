@@ -11,6 +11,8 @@ import {
   ListItemIcon,
   Divider,
   Button,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import {
   DarkMode as DarkModeIcon,
@@ -19,9 +21,11 @@ import {
   Language as LanguageIcon,
 } from '@mui/icons-material';
 import { useThemeContext } from '../ThemeContext';
+import { useLanguage } from '../LanguageContext';
 
 const Settings: React.FC = () => {
   const { mode, toggleTheme } = useThemeContext();
+  const { language, setLanguage, t } = useLanguage();
   const [emailNotify, setEmailNotify] = useState(true);
 
   useEffect(() => {
@@ -42,11 +46,20 @@ const Settings: React.FC = () => {
     }).catch(err => console.error('Failed to update email settings:', err));
   };
 
+  const handleLanguageChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newLanguage: 'tr' | 'en',
+  ) => {
+    if (newLanguage !== null) {
+      setLanguage(newLanguage);
+    }
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Box sx={{ mb: 6 }}>
-        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>Ayarlar</Typography>
-        <Typography variant="h6" color="text.secondary">AETHER platform tercihlerini kişiselleştirin.</Typography>
+        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>{t('settings')}</Typography>
+        <Typography variant="h6" color="text.secondary">{t('personalize')}</Typography>
       </Box>
 
       <Card sx={{ mb: 4 }}>
@@ -54,8 +67,8 @@ const Settings: React.FC = () => {
           <ListItem sx={{ py: 3 }}>
             <ListItemIcon><DarkModeIcon color="primary" /></ListItemIcon>
             <ListItemText
-              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>Karanlık Mod</Typography>}
-              secondary="Platformu koyu temada kullanın."
+              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>{t('darkMode')}</Typography>}
+              secondary={t('darkModeDesc')}
             />
             <Switch checked={mode === 'dark'} onChange={toggleTheme} />
           </ListItem>
@@ -63,8 +76,8 @@ const Settings: React.FC = () => {
           <ListItem sx={{ py: 3 }}>
             <ListItemIcon><NotificationIcon color="primary" /></ListItemIcon>
             <ListItemText
-              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>E-posta Bildirimleri</Typography>}
-              secondary="Yeni modüller ve güncellemeler hakkında e-posta alın."
+              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>{t('emailNotifications')}</Typography>}
+              secondary={t('emailNotificationsDesc')}
             />
             <Switch checked={emailNotify} onChange={handleToggleEmail} />
           </ListItem>
@@ -72,26 +85,35 @@ const Settings: React.FC = () => {
           <ListItem sx={{ py: 3 }}>
             <ListItemIcon><LanguageIcon color="primary" /></ListItemIcon>
             <ListItemText
-              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>Platform Dili</Typography>}
-              secondary="Türkçe (Varsayılan)"
+              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>{t('platformLanguage')}</Typography>}
+              secondary={language === 'tr' ? 'Türkçe' : 'English'}
             />
-            <Button variant="outlined" size="small" disabled>Değiştir</Button>
+            <ToggleButtonGroup
+              value={language}
+              exclusive
+              onChange={handleLanguageChange}
+              size="small"
+              color="primary"
+            >
+              <ToggleButton value="tr">TR</ToggleButton>
+              <ToggleButton value="en">EN</ToggleButton>
+            </ToggleButtonGroup>
           </ListItem>
           <Divider />
           <ListItem sx={{ py: 3 }}>
             <ListItemIcon><SecurityIcon color="primary" /></ListItemIcon>
             <ListItemText
-              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>Hesap Güvenliği</Typography>}
-              secondary="Şifrenizi ve 2FA ayarlarınızı yönetin."
+              primary={<Typography variant="body1" sx={{ fontWeight: 600 }}>{t('accountSecurity')}</Typography>}
+              secondary={t('accountSecurityDesc')}
             />
-            <Button variant="outlined" size="small">Yönet</Button>
+            <Button variant="outlined" size="small">{t('manage')}</Button>
           </ListItem>
         </List>
       </Card>
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-        <Button variant="outlined" color="error">Verilerimi Temizle</Button>
-        <Button variant="contained">Ayarları Uygula</Button>
+        <Button variant="outlined" color="error">{t('clearData')}</Button>
+        <Button variant="contained">{t('applySettings')}</Button>
       </Box>
     </Container>
   );

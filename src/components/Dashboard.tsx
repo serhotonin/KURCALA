@@ -24,6 +24,7 @@ import {
   LocalFireDepartment as HotIcon,
   Science as ScienceIcon,
 } from '@mui/icons-material';
+import { useLanguage } from '../LanguageContext';
 
 interface Stats {
   totalTime: number;
@@ -48,6 +49,7 @@ interface LabNote {
 }
 
 const Dashboard: React.FC = () => {
+  const { t, language } = useLanguage();
   const [stats, setStats] = useState<Stats | null>(null);
   const [notes, setNotes] = useState<LabNote[]>([]);
   const [progress, setProgress] = useState<ModuleProgress[]>([]);
@@ -75,10 +77,10 @@ const Dashboard: React.FC = () => {
   if (!stats) return <LinearProgress />;
 
   const statCards = [
-    { label: 'Toplam Çalışma', value: `${(stats.totalTime / 60).toFixed(1)} Saat`, icon: <TimeIcon color="primary" /> },
-    { label: 'Tamamlanan Modüller', value: stats.modulesCompleted, icon: <CompletedIcon color="primary" /> },
-    { label: 'Başarı Puanı', value: `%${stats.averageScore}`, icon: <TrophyIcon color="primary" /> },
-    { label: 'Aktif Günler', value: stats.activeDays, icon: <TimelineIcon color="primary" /> },
+    { label: t('totalStudy'), value: `${(stats.totalTime / 60).toFixed(1)} ${t('hours')}`, icon: <TimeIcon color="primary" /> },
+    { label: t('completedModules'), value: stats.modulesCompleted, icon: <CompletedIcon color="primary" /> },
+    { label: t('successScore'), value: `%${stats.averageScore}`, icon: <TrophyIcon color="primary" /> },
+    { label: t('activeDays'), value: stats.activeDays, icon: <TimelineIcon color="primary" /> },
   ];
 
   // Calculate progress per grade
@@ -89,27 +91,27 @@ const Dashboard: React.FC = () => {
     const percentage = (totalScore / (totalModules * 100)) * 100;
     
     const labels: Record<number, string> = {
-      5: '5. Sınıf: Kuvvet ve Hareket',
-      6: '6. Sınıf: Güneş Sistemi',
-      7: '7. Sınıf: Karışımlar',
-      8: '8. Sınıf: Basınç',
+      5: t('grade5Topic'),
+      6: t('grade6Topic'),
+      7: t('grade7Topic'),
+      8: t('grade8Topic'),
     };
 
     return { label: labels[grade], value: Math.round(percentage) };
   });
 
   const badges = [
-    { name: 'Hız Tutkunu', desc: 'Bir deneyi 2 dakikadan kısa sürede bitirdi.', icon: <SpeedIcon />, color: '#ef4444' },
-    { name: 'Kaos Teorisyeni', desc: 'Serbest modda sistem sınırlarını zorladı.', icon: <ChaosIcon />, color: '#8b5cf6' },
-    { name: 'Titiz Araştırmacı', desc: 'Laboratuvar defterine 10+ gözlem yazdı.', icon: <RareIcon />, color: '#f59e0b' },
-    { name: 'İlk Kıvılcım', desc: 'İlk elektrik devresini başarıyla kurdu.', icon: <HotIcon />, color: '#10b981' },
+    { name: t('badgeSpeedLabel'), desc: t('badgeSpeedDesc'), icon: <SpeedIcon />, color: '#ef4444' },
+    { name: t('badgeChaosLabel'), desc: t('badgeChaosDesc'), icon: <ChaosIcon />, color: '#8b5cf6' },
+    { name: t('badgeMeticulousLabel'), desc: t('badgeMeticulousDesc'), icon: <RareIcon />, color: '#f59e0b' },
+    { name: t('badgeFirstSparkLabel'), desc: t('badgeFirstSparkDesc'), icon: <HotIcon />, color: '#10b981' },
   ];
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Box sx={{ mb: 6 }}>
-        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>Panel</Typography>
-        <Typography variant="h6" color="text.secondary">AETHER Laboratuvarlarındaki gerçek zamanlı performans verileriniz.</Typography>
+        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>{t('dashboard')}</Typography>
+        <Typography variant="h6" color="text.secondary">{t('performanceData')}</Typography>
       </Box>
 
       {/* Stats Grid */}
@@ -124,7 +126,7 @@ const Dashboard: React.FC = () => {
         {statCards.map((card) => (
           <Card key={card.label} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <Box sx={{ p: 1, borderRadius: 1, backgroundColor: 'rgba(0,0,0,0.03)', display: 'flex' }}>
+              <Box sx={{ p: 1, borderRadius: 1, backgroundColor: 'action.hover', display: 'flex' }}>
                 {card.icon}
               </Box>
               <Typography variant="overline" sx={{ fontWeight: 700, color: 'text.secondary' }}>{card.label}</Typography>
@@ -135,7 +137,7 @@ const Dashboard: React.FC = () => {
       </Box>
 
       {/* Badges Section */}
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>Kazanılan Rozetler</Typography>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>{t('earnedBadges')}</Typography>
       <Box
         sx={{
           display: 'grid',
@@ -162,7 +164,7 @@ const Dashboard: React.FC = () => {
                 {badge.icon}
               </Avatar>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{badge.name}</Typography>
-              <Typography variant="caption" color="text.secondary">Açıldı</Typography>
+              <Typography variant="caption" color="text.secondary">{t('opened')}</Typography>
             </Card>
           </Tooltip>
         ))}
@@ -177,7 +179,7 @@ const Dashboard: React.FC = () => {
       >
         {/* Progress Card */}
         <Card sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ mb: 4, fontWeight: 700 }}>Eğitim İlerlemesi</Typography>
+          <Typography variant="h6" sx={{ mb: 4, fontWeight: 700 }}>{t('trainingProgress')}</Typography>
           <Stack spacing={4}>
             {gradeProgress.map((item) => (
               <Box key={item.label}>
@@ -193,12 +195,12 @@ const Dashboard: React.FC = () => {
 
         {/* Global Notes Card */}
         <Card sx={{ p: 4, display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="h6" sx={{ mb: 4, fontWeight: 700 }}>Tüm Laboratuvar Notları</Typography>
+          <Typography variant="h6" sx={{ mb: 4, fontWeight: 700 }}>{t('allLabNotes')}</Typography>
           <Box sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 400, pr: 1 }}>
              {notes.length === 0 ? (
                <Box sx={{ textAlign: 'center', py: 4 }}>
                   <ScienceIcon sx={{ fontSize: 48, color: 'divider', mb: 2 }} />
-                  <Typography color="text.secondary">Henüz kayıtlı bir notunuz bulunmuyor.</Typography>
+                  <Typography color="text.secondary">{t('noNotes')}</Typography>
                </Box>
              ) : (
                <List sx={{ p: 0 }}>
@@ -208,10 +210,10 @@ const Dashboard: React.FC = () => {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mb: 1 }}>
                            <Chip label={n.topic} size="small" variant="outlined" color="primary" sx={{ fontWeight: 700, borderRadius: 1 }} />
                            <Typography variant="caption" color="text.secondary">
-                              {new Date(n.timestamp).toLocaleString('tr-TR')}
+                              {new Date(n.timestamp).toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US')}
                            </Typography>
                         </Box>
-                        <Box sx={{ bgcolor: 'rgba(0,0,0,0.02)', p: 2, borderRadius: 2, width: '100%' }}>
+                        <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 2, width: '100%' }}>
                            <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>H: {n.hypothesis}</Typography>
                            <Typography variant="body2" color="text.secondary">G: {n.observation}</Typography>
                         </Box>

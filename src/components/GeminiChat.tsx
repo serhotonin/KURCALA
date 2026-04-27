@@ -19,6 +19,7 @@ import {
   DeleteOutlined as DeleteIcon,
   School as TeacherIcon,
 } from '@mui/icons-material';
+import { useLanguage } from '../LanguageContext';
 
 interface Message {
   role: 'user' | 'model';
@@ -26,8 +27,9 @@ interface Message {
 }
 
 const GeminiChat: React.FC = () => {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', text: 'Merhaba! Ben AETHER Yapay Zeka Asistanı. Laboratuvar çalışmalarınızda size rehberlik etmek için buradayım. Hangi konuda yardıma ihtiyacınız var?' }
+    { role: 'model', text: t('aiWelcome') }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -66,14 +68,14 @@ const GeminiChat: React.FC = () => {
       setMessages((prev) => [...prev, { role: 'model', text: data.text }]);
     } catch (error: any) {
       console.error("Gemini API Error:", error);
-      setMessages((prev) => [...prev, { role: 'model', text: `Hata: ${error.message || 'Sunucuyla bağlantı kurulamadı.'}` }]);
+      setMessages((prev) => [...prev, { role: 'model', text: `${t('errorLabel')}: ${error.message || t('errorConnection')}` }]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleClear = () => {
-    setMessages([{ role: 'model', text: 'Sohbet geçmişi temizlendi. Yeni bir soru sorabilirsiniz.' }]);
+    setMessages([{ role: 'model', text: t('chatCleared') }]);
   };
 
   return (
@@ -81,10 +83,10 @@ const GeminiChat: React.FC = () => {
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
-            Yapay Zeka Asistanı
+            {t('aiAssistantTitle')}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Bilimsel sorgularınız için akıllı rehberiniz.
+            {t('aiAssistantDesc')}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -100,7 +102,7 @@ const GeminiChat: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <TeacherIcon fontSize="small" color={socraticMode ? "primary" : "disabled"} />
                 <Typography variant="body2" sx={{ fontWeight: 600, color: socraticMode ? 'text.primary' : 'text.disabled' }}>
-                  Rehber Modu
+                  {t('socraticMode')}
                 </Typography>
               </Box>
             }
@@ -113,7 +115,7 @@ const GeminiChat: React.FC = () => {
             onClick={handleClear}
             sx={{ color: 'text.secondary', borderColor: 'divider' }}
           >
-            Temizle
+            {t('clearChat')}
           </Button>
         </Box>
       </Box>
@@ -192,7 +194,7 @@ const GeminiChat: React.FC = () => {
               </Avatar>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 2, backgroundColor: 'background.paper', borderRadius: 3, border: '1px solid', borderColor: 'divider', borderTopLeftRadius: 4 }}>
                 <CircularProgress size={16} sx={{ color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">Asistan yanıt hazırlıyor...</Typography>
+                <Typography variant="body2" color="text.secondary">{t('assistantTyping')}</Typography>
               </Box>
             </Box>
           )}
@@ -202,7 +204,7 @@ const GeminiChat: React.FC = () => {
         <Box sx={{ p: 2, backgroundColor: 'background.paper', display: 'flex', gap: 1.5, alignItems: 'center' }}>
           <TextField
             fullWidth
-            placeholder="Araştırmak istediğiniz konuyu yazın..."
+            placeholder={t('typeMessage')}
             variant="outlined"
             size="medium"
             value={input}
@@ -224,7 +226,7 @@ const GeminiChat: React.FC = () => {
             sx={{ height: 53, px: 4, borderRadius: 2, boxShadow: 'none' }}
             endIcon={<SendIcon />}
           >
-            Gönder
+            {t('send')}
           </Button>
         </Box>
       </Paper>

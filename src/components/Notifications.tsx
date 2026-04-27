@@ -16,6 +16,7 @@ import {
   Circle as CircleIcon,
   Done as DoneIcon,
 } from '@mui/icons-material';
+import { useLanguage } from '../LanguageContext';
 
 interface Notification {
   id: number;
@@ -25,6 +26,7 @@ interface Notification {
 }
 
 const Notifications: React.FC = () => {
+  const { t, language } = useLanguage();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const fetchNotifications = () => {
@@ -47,15 +49,15 @@ const Notifications: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Box sx={{ mb: 6 }}>
-        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>Bildirimler</Typography>
-        <Typography variant="h6" color="text.secondary">AETHER sisteminden gelen son güncellemeler.</Typography>
+        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>{t('notifications')}</Typography>
+        <Typography variant="h6" color="text.secondary">{t('notificationUpdates')}</Typography>
       </Box>
 
       <Card>
         <List sx={{ p: 0 }}>
           {notifications.length === 0 ? (
             <ListItem sx={{ py: 4, textAlign: 'center' }}>
-              <ListItemText primary="Yeni bildiriminiz bulunmamaktadır." />
+              <ListItemText primary={t('noNewNotifications')} />
             </ListItem>
           ) : (
             notifications.map((n, index) => (
@@ -70,7 +72,7 @@ const Notifications: React.FC = () => {
                   }
                   sx={{
                     py: 2.5,
-                    backgroundColor: n.read === 0 ? 'rgba(0,0,0,0.01)' : 'transparent',
+                    backgroundColor: n.read === 0 ? 'action.hover' : 'transparent',
                     opacity: n.read === 1 ? 0.6 : 1,
                   }}
                 >
@@ -87,7 +89,7 @@ const Notifications: React.FC = () => {
                         {n.message}
                       </Typography>
                     }
-                    secondary={new Date(n.timestamp).toLocaleString('tr-TR')}
+                    secondary={new Date(n.timestamp).toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US')}
                   />
                 </ListItem>
                 {index < notifications.length - 1 && <Divider />}

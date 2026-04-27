@@ -24,9 +24,11 @@ import {
   Brightness7 as LightIcon,
   ChevronLeft as ChevronLeftIcon,
   Menu as MenuIcon,
+  ContactSupport as ContactIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeContext } from '../ThemeContext';
+import { useLanguage } from '../LanguageContext';
 
 const drawerWidth = 280;
 const collapsedWidth = 88;
@@ -40,12 +42,13 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useThemeContext();
+  const { t } = useLanguage();
 
   const menuItems = [
-    { label: '5. Sınıf', path: '/grade/5' },
-    { label: '6. Sınıf', path: '/grade/6' },
-    { label: '7. Sınıf', path: '/grade/7' },
-    { label: '8. Sınıf', path: '/grade/8' },
+    { label: t('grade5'), path: '/grade/5' },
+    { label: t('grade6'), path: '/grade/6' },
+    { label: t('grade7'), path: '/grade/7' },
+    { label: t('grade8'), path: '/grade/8' },
   ];
 
   const currentWidth = collapsed ? collapsedWidth : drawerWidth;
@@ -72,31 +75,69 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
       }}
     >
       {/* Header Area */}
-      <Box sx={{ 
-        p: 2, 
-        height: 80, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: collapsed ? 'center' : 'space-between' 
-      }}>
+      <Box 
+        onClick={() => navigate('/')}
+        sx={{ 
+          p: 2, 
+          height: 80, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: collapsed ? 'center' : 'space-between',
+          cursor: 'pointer',
+          '&:hover': { opacity: 0.8 }
+        }}
+      >
         {!collapsed && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 32, height: 32, backgroundColor: 'primary.main', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Typography sx={{ color: 'white', fontWeight: 800, fontSize: '1.2rem' }}>A</Typography>
+            <Box sx={{ 
+              width: 32, 
+              height: 32, 
+              backgroundColor: 'primary.main', 
+              borderRadius: 1, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <Typography sx={{ 
+                color: mode === 'dark' ? '#000000' : '#ffffff', 
+                fontWeight: 800, 
+                fontSize: '1.2rem' 
+              }}>K</Typography>
             </Box>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>
-                AETHER
+                {t('appName')}
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: 0.5 }}>
-                LABS
+                {t('appTagline')}
               </Typography>
             </Box>
           </Box>
         )}
 
+        {collapsed && (
+          <Box sx={{ 
+            width: 32, 
+            height: 32, 
+            backgroundColor: 'primary.main', 
+            borderRadius: 1, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+          }}>
+            <Typography sx={{ 
+              color: mode === 'dark' ? '#000000' : '#ffffff', 
+              fontWeight: 800, 
+              fontSize: '1.2rem' 
+            }}>K</Typography>
+          </Box>
+        )}
+      </Box>
+
+      <Box sx={{ px: 2, mb: 1 }}>
         <IconButton onClick={onToggle} size="small" sx={{ 
-            ml: collapsed ? 0 : 1,
+            width: '100%',
+            borderRadius: 2,
             bgcolor: 'action.hover',
             '&:hover': { bgcolor: 'primary.main', color: 'white' }
         }}>
@@ -123,11 +164,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
       <Box sx={{ px: 2, mt: 1 }}>
         {!collapsed && (
           <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2 }}>
-            ANA MENÜ
+            {t('mainMenu')}
           </Typography>
         )}
         <List>
-          <Tooltip title={collapsed ? 'Panel' : ''} placement="right">
+          <Tooltip title={collapsed ? t('dashboard') : ''} placement="right">
             <ListItem disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
                 onClick={() => navigate('/')}
@@ -142,7 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                 <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
                   <DashboardIcon color={location.pathname === '/' ? 'primary' : 'inherit'} />
                 </ListItemIcon>
-                {!collapsed && <ListItemText primary="Panel" sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
+                {!collapsed && <ListItemText primary={t('dashboard')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 700 }} />}
               </ListItemButton>
             </ListItem>
           </Tooltip>
@@ -150,7 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
 
         {!collapsed && (
           <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
-            MÜFREDAT
+            {t('curriculum')}
           </Typography>
         )}
         <List>
@@ -179,11 +220,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
 
         {!collapsed && (
           <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
-            YAPAY ZEKA
+            {t('aiAssistant')}
           </Typography>
         )}
         <List>
-          <Tooltip title={collapsed ? 'Gemini Asistan' : ''} placement="right">
+          <Tooltip title={collapsed ? t('geminiAssistant') : ''} placement="right">
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => navigate('/gemini')}
@@ -206,7 +247,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                 <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
                   <GeminiIcon />
                 </ListItemIcon>
-                {!collapsed && <ListItemText primary="Gemini Asistan" sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 800 }} />}
+                {!collapsed && <ListItemText primary={t('geminiAssistant')} sx={{ opacity: 1 }} primaryTypographyProps={{ fontWeight: 800 }} />}
               </ListItemButton>
             </ListItem>
           </Tooltip>
@@ -219,8 +260,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
       <Box sx={{ px: 2, py: 2 }}>
         <List>
           {[
-            { label: 'Bildirimler', icon: <NotificationsIcon />, path: '/notifications' },
-            { label: 'Ayarlar', icon: <SettingsIcon />, path: '/settings' },
+            { label: t('notifications'), icon: <NotificationsIcon />, path: '/notifications' },
+            { label: t('contactUs'), icon: <ContactIcon />, path: '/contact' },
+            { label: t('settings'), icon: <SettingsIcon />, path: '/settings' },
           ].map((item) => (
             <Tooltip key={item.path} title={collapsed ? item.label : ''} placement="right">
               <ListItem disablePadding sx={{ mb: 0.5 }}>
@@ -253,11 +295,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
             height: 40, 
             bgcolor: 'secondary.main', 
             boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-        }}>Ö</Avatar>
+        }}>{t('student').charAt(0)}</Avatar>
         {!collapsed && (
           <Box sx={{ overflow: 'hidden' }}>
-            <Typography variant="body2" sx={{ fontWeight: 800, whiteSpace: 'nowrap' }}>Öğrenci</Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>ogrenci@aether.edu.tr</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 800, whiteSpace: 'nowrap' }}>{t('student')}</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>ogrenci@kurcala.edu.tr</Typography>
           </Box>
         )}
       </Box>

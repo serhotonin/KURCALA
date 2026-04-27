@@ -26,6 +26,7 @@ import {
   Close as CloseIcon,
   ArrowForward as ArrowIcon
 } from '@mui/icons-material';
+import { useLanguage } from '../LanguageContext';
 
 // --- Grade 5-6 Components ---
 import SolarSystemSimulation from './Grade5-6/SolarSystemSimulation';
@@ -85,12 +86,13 @@ interface LabNote {
 const GradeView: React.FC = () => {
   const { gradeId } = useParams<{ gradeId: string }>();
   const theme = useTheme();
+  const { t } = useLanguage();
   
   const topics = {
-    '5': ["Sürtünme Kuvveti (Buzul Gezegeni)", "Elektrik Devreleri (Karanlık Mahalle)"],
-    '6': ["Güneş Sistemi (Yörünge İstasyonu)", "Yoğunluk (Kayıp Kıta)"],
-    '7': ["Karışımlar (Simyacı İksiri)", "Asitler ve Bazlar (Sızıntı)"],
-    '8': ["Sıvı Basıncı (Baraj Çatlağı)", "İklim ve Hava (OpenWeather Canlı Veri)"],
+    '5': [t('topics.friction'), t('topics.circuits')],
+    '6': [t('topics.solar'), t('topics.density')],
+    '7': [t('topics.mixtures'), t('topics.acidBase')],
+    '8': [t('topics.pressure'), t('topics.weather')],
   }[gradeId || '5'] || [];
 
   const [viewState, setViewState] = useState<'list' | 'briefing' | 'simulation'>('list');
@@ -155,19 +157,28 @@ const GradeView: React.FC = () => {
 
   const renderSimulationContent = () => {
     if (!activeTopic) return null;
-    if (activeTopic.includes("Karışımlar")) return <AlchemyMixtures />;
-    if (activeTopic.includes("Güneş Sistemi")) return <SolarSystemSimulation />;
-    if (activeTopic.includes("Elektrik Devreleri")) {
+    
+    // Check by split part for localization robustness
+    const isMixtures = activeTopic.includes(t('topics.mixtures', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.mixtures', { lng: 'en' }).split(' (')[0]);
+    const isSolar = activeTopic.includes(t('topics.solar', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.solar', { lng: 'en' }).split(' (')[0]);
+    const isCircuits = activeTopic.includes(t('topics.circuits', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.circuits', { lng: 'en' }).split(' (')[0]);
+    const isAcidBase = activeTopic.includes(t('topics.acidBase', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.acidBase', { lng: 'en' }).split(' (')[0]);
+    const isPressure = activeTopic.includes(t('topics.pressure', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.pressure', { lng: 'en' }).split(' (')[0]);
+    const isWeather = activeTopic.includes(t('topics.weather', { lng: 'tr' }).split(' (')[0]) || activeTopic.includes(t('topics.weather', { lng: 'en' }).split(' (')[0]);
+
+    if (isMixtures) return <AlchemyMixtures />;
+    if (isSolar) return <SolarSystemSimulation />;
+    if (isCircuits) {
       return sandboxMode ? <CircuitSimulation /> : <DarkNeighborhoodSimulation />;
     }
-    if (activeTopic.includes("Asitler")) return <AcidBaseSimulation sandbox={sandboxMode} />;
-    if (activeTopic.includes("Basıncı")) return <PressureSimulation sandbox={sandboxMode} />;
-    if (activeTopic.includes("İklim")) return <WeatherSimulation sandbox={sandboxMode} />;
+    if (isAcidBase) return <AcidBaseSimulation sandbox={sandboxMode} />;
+    if (isPressure) return <PressureSimulation sandbox={sandboxMode} />;
+    if (isWeather) return <WeatherSimulation sandbox={sandboxMode} />;
     
     return (
        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, py: 10 }}>
           <ScienceIcon sx={{ fontSize: 80, color: 'text.disabled' }} />
-          <Typography variant="h5" color="text.secondary">Geliştirme Aşamasında...</Typography>
+          <Typography variant="h5" color="text.secondary">{t('inDevelopment')}</Typography>
        </Box>
     );
   };
@@ -177,10 +188,10 @@ const GradeView: React.FC = () => {
       <Container maxWidth="xl" sx={{ py: 8 }}>
         <Box sx={{ mb: 10, textAlign: 'center' }}>
           <Typography variant="h2" sx={{ fontWeight: 950, mb: 2, letterSpacing: -2 }}>
-            {gradeId}. Sınıf <span style={{ color: theme.palette.primary.main }}>Laboratuvarı</span>
+            {t('gradeLabTitle').replace('{grade}', gradeId || '5')}
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500, maxWidth: 700, mx: 'auto' }}>
-            Bilimsel keşfe başlamak için bir modül seçin. Tüm simülasyonlar MEB müfredatıyla tam uyumludur.
+            {t('gradeLabDesc')}
           </Typography>
         </Box>
 
@@ -203,7 +214,7 @@ const GradeView: React.FC = () => {
                     {topic}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 4, fontWeight: 500, lineHeight: 1.6 }}>
-                    Sanal laboratuvar ortamında {topic.split('(')[0]} konusunu interaktif verilerle analiz edin ve bilimsel raporunuzu hazırlayın.
+                    {t('topicDesc').replace('{topic}', topic.split(' (')[0])}
                   </Typography>
                   <Box sx={{ 
                     mt: 'auto', 
@@ -214,7 +225,7 @@ const GradeView: React.FC = () => {
                     fontWeight: 900,
                     fontSize: '1.1rem'
                   }}>
-                    MODÜLÜ BAŞLAT <ArrowIcon />
+                    {t('startModule')} <ArrowIcon />
                   </Box>
                 </CardContent>
               </CardActionArea>
@@ -248,23 +259,23 @@ const GradeView: React.FC = () => {
             color: 'white',
             borderBottomLeftRadius: '20px'
           }}>
-            <Typography variant="overline" sx={{ fontWeight: 900, fontSize: '0.8rem', letterSpacing: 1 }}>GÖREV DOSYASI</Typography>
+            <Typography variant="overline" sx={{ fontWeight: 900, fontSize: '0.8rem', letterSpacing: 1 }}>{t('missionFile')}</Typography>
           </Box>
           
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <Box>
-                <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>DENEY KONUSU</Typography>
+                <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>{t('experimentTopic')}</Typography>
                 <Typography variant="h3" sx={{ fontWeight: 950, mt: 1, letterSpacing: -1 }}>{activeTopic}</Typography>
             </Box>
 
             <Typography variant="body1" sx={{ fontSize: '1.3rem', lineHeight: 1.8, color: 'text.secondary', fontStyle: 'italic', borderLeft: '4px solid', pl: 3, borderColor: 'primary.light' }}>
-              "Laboratuvar hazır. Bilimsel verileri toplayıp görevi tamamlamak senin elinde! Deney sırasında gözlemlerini not almayı unutma."
+              {t('experimentBriefing')}
             </Typography>
 
             <Divider />
 
             <Grid container spacing={3}>
-                <Grid item xs={12} sm={activeTopic.includes("Elektrik") ? 4 : 6}>
+                <Grid item xs={12} sm={activeTopic.includes(t('topics.circuits', {lng:'tr'}).split(' (')[0]) || activeTopic.includes(t('topics.circuits', {lng:'en'}).split(' (')[0]) ? 4 : 6}>
                     <Button 
                         variant="contained" 
                         size="large" 
@@ -273,10 +284,10 @@ const GradeView: React.FC = () => {
                         sx={{ py: 2.5, borderRadius: 4, fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 20px -5px rgba(0,0,0,0.2)' }}
                         startIcon={<PlayIcon />}
                     >
-                        Deneye Başla
+                        {t('startExperiment')}
                     </Button>
                 </Grid>
-                {activeTopic.includes("Elektrik") && (
+                {(activeTopic.includes(t('topics.circuits', {lng:'tr'}).split(' (')[0]) || activeTopic.includes(t('topics.circuits', {lng:'en'}).split(' (')[0])) && (
                   <Grid item xs={12} sm={4}>
                       <Button 
                           variant="contained" 
@@ -290,11 +301,11 @@ const GradeView: React.FC = () => {
                           sx={{ py: 2.5, borderRadius: 4, fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 20px -5px rgba(0,0,0,0.2)' }}
                           startIcon={<ScienceIcon />}
                       >
-                          Özgür Mod
+                          {t('sandboxMode')}
                       </Button>
                   </Grid>
                 )}
-                <Grid item xs={12} sm={activeTopic.includes("Elektrik") ? 4 : 6}>
+                <Grid item xs={12} sm={activeTopic.includes(t('topics.circuits', {lng:'tr'}).split(' (')[0]) || activeTopic.includes(t('topics.circuits', {lng:'en'}).split(' (')[0]) ? 4 : 6}>
                     <Button 
                         variant="outlined" 
                         size="large" 
@@ -302,7 +313,7 @@ const GradeView: React.FC = () => {
                         onClick={() => setViewState('list')}
                         sx={{ py: 2.5, borderRadius: 4, fontWeight: 800 }}
                     >
-                        Listeye Geri Dön
+                        {t('backToList')}
                     </Button>
                 </Grid>
             </Grid>
@@ -329,7 +340,7 @@ const GradeView: React.FC = () => {
                 onClick={() => setNotebookOpen(true)}
                 sx={{ borderRadius: 10, fontWeight: 700, px: 3 }}
             >
-                Laboratuvar Defteri
+                {t('labNotebook')}
             </Button>
             {!missionComplete && (
                 <Button 
@@ -339,7 +350,7 @@ const GradeView: React.FC = () => {
                     onClick={handleComplete}
                     sx={{ borderRadius: 10, fontWeight: 900, px: 3 }}
                 >
-                    Görevi Bitir
+                    {t('finishMission')}
                 </Button>
             )}
         </Box>
@@ -375,11 +386,11 @@ const GradeView: React.FC = () => {
         >
           <TrophyIcon sx={{ fontSize: 40 }} />
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 950 }}>GÖREV TAMAMLANDI!</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 700, opacity: 0.9 }}>Akademik ilerleme veri tabanına kaydedildi.</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 950 }}>{t('missionCompleted')}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 700, opacity: 0.9 }}>{t('missionSaved')}</Typography>
           </Box>
           <Button variant="contained" color="inherit" sx={{ color: 'success.main', fontWeight: 900, borderRadius: 5, ml: 2, px: 3 }} onClick={() => setViewState('list')}>
-            Devam Et
+            {t('continue')}
           </Button>
         </Paper>
       )}

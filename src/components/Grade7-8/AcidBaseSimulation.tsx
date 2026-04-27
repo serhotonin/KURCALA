@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Slider, keyframes } from '@mui/material';
+import { useLanguage } from '../../LanguageContext';
 
 const fire = keyframes`
   0%, 100% { transform: scaleY(1); }
@@ -13,6 +14,7 @@ const sizzle = keyframes`
 `;
 
 const AcidBaseSimulation: React.FC<{ sandbox: boolean }> = ({ sandbox }) => {
+  const { t } = useLanguage();
   const [ph, setPh] = useState(7);
   const [isMelting, setIsMelting] = useState(false);
 
@@ -59,7 +61,7 @@ const AcidBaseSimulation: React.FC<{ sandbox: boolean }> = ({ sandbox }) => {
       </Box>
 
       <Box sx={{ mt: 4, width: 300 }}>
-        <Typography align="center" variant="h5" sx={{ fontWeight: 800, mb: 2, color: getColor(ph) }}>pH Seviyesi: {ph.toFixed(1)}</Typography>
+        <Typography align="center" variant="h5" sx={{ fontWeight: 800, mb: 2, color: getColor(ph) }}>{t('phLevel')}: {ph.toFixed(1)}</Typography>
         <Slider 
           value={ph} 
           min={sandbox ? 0 : 3} 
@@ -69,9 +71,9 @@ const AcidBaseSimulation: React.FC<{ sandbox: boolean }> = ({ sandbox }) => {
           sx={{ color: getColor(ph) }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-           <Typography variant="caption" sx={{ fontWeight: 900, color: 'red' }}>ASİT</Typography>
-           <Typography variant="caption" sx={{ fontWeight: 900, color: '#888' }}>NÖTR</Typography>
-           <Typography variant="caption" sx={{ fontWeight: 900, color: 'blue' }}>BAZ</Typography>
+           <Typography variant="caption" sx={{ fontWeight: 900, color: 'red' }}>{t('acid')}</Typography>
+           <Typography variant="caption" sx={{ fontWeight: 900, color: '#888' }}>{t('neutral')}</Typography>
+           <Typography variant="caption" sx={{ fontWeight: 900, color: 'blue' }}>{t('base')}</Typography>
         </Box>
       </Box>
     </Box>

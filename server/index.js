@@ -127,7 +127,8 @@ app.post('/api/ai/chat', [
     });
 
     const promptToSend = socratic 
-      ? `ÖNEMLİ PEDAGOJİK TALİMAT: Sen AETHER Labs'in Sokratik bir öğretmenisin. Öğrenciye ASLA doğrudan cevap verme. Ona ipuçları ver ve düşünmesini sağlayacak sorular sorarak cevabı kendisinin bulmasını sağla. Öğrencinin sorusu: ${message}` 
+      ? `ÖNEMLİ PEDAGOJİK TALİMAT: Sen KURCALA Labs'in Sokratik bir öğretmenisin. Öğrenciye ASLA doğrudan cevap verme. Ona ipuçları ver ve düşünmesini sağlayacak sorular sorarak cevabı kendisinin bulmasını sağla. Öğrencinin sorusu: ${message}`
+ 
       : message;
 
     const result = await chat.sendMessage(promptToSend);
@@ -273,7 +274,7 @@ app.post('/api/notes', [
 });
 
 // All other GET requests not handled before will return the React app
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   } else {

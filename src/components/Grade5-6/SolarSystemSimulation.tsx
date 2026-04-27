@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '../../LanguageContext';
 
 // --- TYPES ---
 interface Planet {
@@ -103,17 +104,36 @@ const QUESTIONS = [
 ];
 
 const SolarSystemSimulation = () => {
+  const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
   const [userOrder, setUserOrder] = useState<Planet[]>([]);
   const [sizeOrder, setSizeOrder] = useState<Planet[]>([]);
   const [categories, setCategories] = useState<{ inner: Planet[], outer: Planet[] }>({ inner: [], outer: [] });
   const [selectedPlanet, setSelectedPlanet] = useState<Planet | null>(null);
-  const [feedback, setFeedback] = useState({ message: 'Güneş Sistemi Görevine Hoş Geldin Kaptan!', type: 'info' });
+  const [feedback, setFeedback] = useState({ message: '', type: 'info' });
   const [shuffledPlanets, setShuffledPlanets] = useState<Planet[]>([]);
 
+  const PLANETS_LOCALIZED: Planet[] = [
+    { ...PLANETS[0], name: t('planets.mercury.name'), features: t('planets.mercury.features') },
+    { ...PLANETS[1], name: t('planets.venus.name'), features: t('planets.venus.features') },
+    { ...PLANETS[2], name: t('planets.earth.name'), features: t('planets.earth.features') },
+    { ...PLANETS[3], name: t('planets.mars.name'), features: t('planets.mars.features') },
+    { ...PLANETS[4], name: t('planets.jupiter.name'), features: t('planets.jupiter.features') },
+    { ...PLANETS[5], name: t('planets.saturn.name'), features: t('planets.saturn.features') },
+    { ...PLANETS[6], name: t('planets.uranus.name'), features: t('planets.uranus.features') },
+    { ...PLANETS[7], name: t('planets.neptune.name'), features: t('planets.neptune.features') },
+  ];
+
+  const QUESTIONS_LOCALIZED = [
+    { ...QUESTIONS[0], text: t('questions.0.text'), instruction: t('questions.0.instruction') },
+    { ...QUESTIONS[1], text: t('questions.1.text'), instruction: t('questions.1.instruction') },
+    { ...QUESTIONS[2], text: t('questions.2.text'), instruction: t('questions.2.instruction') },
+  ];
+
   useEffect(() => {
-    setShuffledPlanets([...PLANETS].sort(() => Math.random() - 0.5));
-  }, []);
+    setShuffledPlanets([...PLANETS_LOCALIZED].sort(() => Math.random() - 0.5));
+    setFeedback({ message: t('welcomeCaptain'), type: 'info' });
+  }, [t]);
 
   // --- ACTIONS ---
   const handleOrderAdd = (planet: Planet) => {
@@ -124,9 +144,9 @@ const SolarSystemSimulation = () => {
     if (newOrder.length === PLANETS.length) {
       const isCorrect = newOrder.every((p, idx) => p.order === idx + 1);
       if (isCorrect) {
-        setFeedback({ message: 'Harika! Gezegenleri doğru yörüngelerine yerleştirdin.', type: 'success' });
+        setFeedback({ message: t('orderingSuccess'), type: 'success' });
       } else {
-        setFeedback({ message: 'Bazı gezegenler yanlış yörüngede. Sıralamayı kontrol et!', type: 'error' });
+        setFeedback({ message: t('orderingError'), type: 'error' });
       }
     }
   };
@@ -134,7 +154,7 @@ const SolarSystemSimulation = () => {
   const handleOrderRemove = (planetId: string) => {
     const newOrder = userOrder.filter(p => p.id !== planetId);
     setUserOrder(newOrder);
-    setFeedback({ message: 'Gezegen yörüngeden kaldırıldı.', type: 'info' });
+    setFeedback({ message: t('language') === 'tr' ? 'Gezegen yörüngeden kaldırıldı.' : 'Planet removed from orbit.', type: 'info' });
   };
 
   const handleUndo = () => {
@@ -143,7 +163,7 @@ const SolarSystemSimulation = () => {
     } else if (activeStep === 2) {
       setSizeOrder(prev => prev.slice(0, -1));
     }
-    setFeedback({ message: 'Son işlem geri alındı.', type: 'info' });
+    setFeedback({ message: t('undo') + '...', type: 'info' });
   };
 
   const handleSizeAdd = (planet: Planet) => {
@@ -152,14 +172,13 @@ const SolarSystemSimulation = () => {
     setSizeOrder(newOrder);
 
     if (newOrder.length === PLANETS.length) {
-      // Sort planets by size descending
-      const correctSizeOrder = [...PLANETS].sort((a, b) => b.size - a.size);
+      const correctSizeOrder = [...PLANETS_LOCALIZED].sort((a, b) => b.size - a.size);
       const isCorrect = newOrder.every((p, idx) => p.id === correctSizeOrder[idx].id);
       
       if (isCorrect) {
-        setFeedback({ message: 'Mükemmel! Gezegenleri büyüklüklerine göre doğru sıraladın.', type: 'success' });
+        setFeedback({ message: t('sizeSuccess'), type: 'success' });
       } else {
-        setFeedback({ message: 'Büyüklük sıralamasında hata var. Gaz devlerinin daha büyük olduğunu unutma!', type: 'error' });
+        setFeedback({ message: t('sizeError'), type: 'error' });
       }
     }
   };
@@ -179,9 +198,9 @@ const SolarSystemSimulation = () => {
       const innerCorrect = newCategories.inner.every(p => p.type === 'inner');
       const outerCorrect = newCategories.outer.every(p => p.type === 'outer');
       if (innerCorrect && outerCorrect) {
-        setFeedback({ message: 'Tebrikler! İç ve Dış gezegenleri başarıyla gruplandırdın.', type: 'success' });
+        setFeedback({ message: t('categorizingSuccess'), type: 'success' });
       } else {
-        setFeedback({ message: 'Gruplandırmada hata var. Gezegenlerin yapılarını hatırla!', type: 'error' });
+        setFeedback({ message: t('categorizingError'), type: 'error' });
       }
     }
   };
@@ -191,27 +210,27 @@ const SolarSystemSimulation = () => {
     setSizeOrder([]);
     setCategories({ inner: [], outer: [] });
     setSelectedPlanet(null);
-    setFeedback({ message: QUESTIONS[activeStep].text, type: 'info' });
+    setFeedback({ message: QUESTIONS_LOCALIZED[activeStep].text, type: 'info' });
   };
 
   const nextStep = () => {
-    if (activeStep < QUESTIONS.length - 1) {
+    if (activeStep < QUESTIONS_LOCALIZED.length - 1) {
       const nextIdx = activeStep + 1;
       setActiveStep(nextIdx);
       setUserOrder([]);
       setSizeOrder([]);
       setCategories({ inner: [], outer: [] });
       setSelectedPlanet(null);
-      setFeedback({ message: QUESTIONS[nextIdx].text, type: 'info' });
+      setFeedback({ message: QUESTIONS_LOCALIZED[nextIdx].text, type: 'info' });
     } else {
-      setFeedback({ message: 'Tebrikler Kaptan! Tüm görevleri başarıyla tamamladın. Sistem yeniden başlatılıyor...', type: 'success' });
+      setFeedback({ message: t('allMissionsSuccess'), type: 'success' });
       setTimeout(() => {
         setActiveStep(0);
         setUserOrder([]);
         setSizeOrder([]);
         setCategories({ inner: [], outer: [] });
         setSelectedPlanet(null);
-        setFeedback({ message: QUESTIONS[0].text, type: 'info' });
+        setFeedback({ message: QUESTIONS_LOCALIZED[0].text, type: 'info' });
       }, 3000);
     }
   };
@@ -219,7 +238,6 @@ const SolarSystemSimulation = () => {
   return (
     <div className="relative w-full max-w-7xl mx-auto p-12 bg-slate-950 rounded-[50px] border-[8px] border-slate-900 shadow-2xl overflow-hidden text-slate-100">
       
-      {/* Background Stars */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         {[...Array(50)].map((_, i) => (
           <div key={i} className="absolute bg-white rounded-full" style={{
@@ -235,7 +253,7 @@ const SolarSystemSimulation = () => {
 
       <header className="relative z-10 text-center mb-8">
         <h1 className="text-4xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500">
-           GÜNEŞ SİSTEMİ KEŞİF ARACI
+           {t('solarSystemTitle')}
         </h1>
         <div className={`mt-4 inline-block px-8 py-2 rounded-xl border-2 transition-all backdrop-blur-xl
           ${feedback.type === 'success' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 
@@ -244,25 +262,24 @@ const SolarSystemSimulation = () => {
         `}>
           {feedback.message}
         </div>
-        {QUESTIONS[activeStep] && (
+        {QUESTIONS_LOCALIZED[activeStep] && (
           <p className="mt-2 text-slate-500 text-sm font-medium animate-pulse">
-            💡 {QUESTIONS[activeStep].instruction}
+            💡 {QUESTIONS_LOCALIZED[activeStep].instruction}
           </p>
         )}
       </header>
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Planet Selection Area */}
         <div className="lg:col-span-3 space-y-4">
-          <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest pl-2">Gezegen Paneli</h2>
+          <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest pl-2">{t('planetPanel')}</h2>
           <div className="grid grid-cols-2 gap-3">
             {shuffledPlanets.map((planet) => (
               <button
                 key={planet.id}
                 onClick={() => {
                   if (activeStep === 0) handleOrderAdd(planet);
-                  if (activeStep === 1) setSelectedPlanet(planet); // Show details before categorizing
+                  if (activeStep === 1) setSelectedPlanet(planet); 
                   if (activeStep === 2) handleSizeAdd(planet);
                 }}
                 disabled={!!((activeStep === 0 && userOrder.find(p => p.id === planet.id)) || 
@@ -293,8 +310,8 @@ const SolarSystemSimulation = () => {
                 </ul>
                 {activeStep === 1 && (
                   <div className="flex gap-2 mt-4">
-                    <button onClick={() => handleCategoryAdd(selectedPlanet, 'inner')} className="flex-1 py-2 bg-stone-700 rounded-lg text-[9px] font-black hover:bg-stone-600">İÇ (KARASAL)</button>
-                    <button onClick={() => handleCategoryAdd(selectedPlanet, 'outer')} className="flex-1 py-2 bg-amber-900 rounded-lg text-[9px] font-black hover:bg-amber-800">DIŞ (GAZ)</button>
+                    <button onClick={() => handleCategoryAdd(selectedPlanet!, 'inner')} className="flex-1 py-2 bg-stone-700 rounded-lg text-[9px] font-black hover:bg-stone-600">{t('language') === 'tr' ? 'İÇ (KARASAL)' : 'INNER (TERRESTRIAL)'}</button>
+                    <button onClick={() => handleCategoryAdd(selectedPlanet!, 'outer')} className="flex-1 py-2 bg-amber-900 rounded-lg text-[9px] font-black hover:bg-amber-800">{t('language') === 'tr' ? 'DIŞ (GAZ)' : 'OUTER (GAS)'}</button>
                   </div>
                 )}
              </div>
@@ -306,15 +323,13 @@ const SolarSystemSimulation = () => {
               disabled={(activeStep === 0 && userOrder.length === 0) || (activeStep === 2 && sizeOrder.length === 0)}
               className="w-full py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-2xl text-xs font-black transition-all border border-slate-700 flex items-center justify-center gap-2"
             >
-              <span>↩️</span> GERİ AL
+              <span>↩️</span> {t('undo')}
             </button>
           )}
         </div>
 
-        {/* Workspace */}
         <div className="lg:col-span-9 bg-slate-900/40 rounded-[40px] border-2 border-slate-800 p-8 min-h-[500px] flex flex-col">
           
-          {/* STEP 0: ORDERING */}
           {activeStep === 0 && (
             <div className="flex-1 flex flex-col">
                <div className="flex items-center gap-4 mb-8">
@@ -343,27 +358,26 @@ const SolarSystemSimulation = () => {
                             style={{ width: Math.max(40, planet.size / 2.5 + 30), height: Math.max(40, planet.size / 2.5 + 30) }}>
                           <img src={planet.image} alt={planet.name} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-rose-500/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                             <span className="text-[8px] font-black">KALDIR</span>
+                             <span className="text-[8px] font-black">{t('language') === 'tr' ? 'KALDIR' : 'REMOVE'}</span>
                           </div>
                        </div>
                        <span className="text-[10px] font-black mt-2 text-slate-400">{planet.name}</span>
-                       <span className="text-[8px] text-blue-500 font-bold">{idx + 1}. Yörünge</span>
+                       <span className="text-[8px] text-blue-500 font-bold">{idx + 1}. {t('language') === 'tr' ? 'Yörünge' : 'Orbit'}</span>
                     </div>
                   ))}
                   {userOrder.length === 0 && (
                     <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-800 rounded-3xl">
-                       <p className="text-slate-600 font-black italic">Gezegenleri sırasıyla buraya ekle...</p>
+                       <p className="text-slate-600 font-black italic">{t('language') === 'tr' ? 'Gezegenleri sırasıyla buraya ekle...' : 'Add planets here in order...'}</p>
                     </div>
                   )}
                </div>
             </div>
           )}
 
-          {/* STEP 1: CATEGORIZING */}
           {activeStep === 1 && (
             <div className="flex-1 grid grid-cols-2 gap-8">
                <div className="bg-stone-900/40 rounded-3xl border-2 border-stone-800 p-6 flex flex-col">
-                  <h3 className="text-center font-black text-stone-500 mb-4 uppercase tracking-widest text-sm">İç Gezegenler (Karasal)</h3>
+                  <h3 className="text-center font-black text-stone-500 mb-4 uppercase tracking-widest text-sm">{t('innerPlanetsLabel')}</h3>
                   <div className="flex-1 flex flex-wrap gap-4 items-center justify-center">
                      {categories.inner.map(p => (
                         <div key={p.id} className="flex flex-col items-center">
@@ -374,7 +388,7 @@ const SolarSystemSimulation = () => {
                   </div>
                </div>
                <div className="bg-amber-900/20 rounded-3xl border-2 border-amber-900/40 p-6 flex flex-col">
-                  <h3 className="text-center font-black text-amber-600 mb-4 uppercase tracking-widest text-sm">Dış Gezegenler (Gaz/Buz Devleri)</h3>
+                  <h3 className="text-center font-black text-amber-600 mb-4 uppercase tracking-widest text-sm">{t('outerPlanetsLabel')}</h3>
                   <div className="flex-1 flex flex-wrap gap-4 items-center justify-center">
                      {categories.outer.map(p => (
                         <div key={p.id} className="flex flex-col items-center">
@@ -387,13 +401,12 @@ const SolarSystemSimulation = () => {
             </div>
           )}
 
-          {/* STEP 2: SIZE ORDERING */}
           {activeStep === 2 && (
             <div className="flex-1 flex flex-col">
                <div className="mb-6 flex justify-between items-center bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
-                  <span className="text-xs font-black text-slate-400">EN BÜYÜK</span>
+                  <span className="text-xs font-black text-slate-400">{t('largest')}</span>
                   <div className="flex-1 mx-4 h-0.5 bg-slate-700" />
-                  <span className="text-xs font-black text-slate-400">EN KÜÇÜK</span>
+                  <span className="text-xs font-black text-slate-400">{t('smallest')}</span>
                </div>
                <div className="flex-1 flex items-end justify-center gap-2 pb-10">
                   {sizeOrder.map((planet, idx) => (
@@ -411,7 +424,7 @@ const SolarSystemSimulation = () => {
                        >
                           <img src={planet.image} alt={planet.name} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-rose-500/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                             <span className="text-[8px] font-black text-white uppercase">Kaldır</span>
+                             <span className="text-[8px] font-black text-white uppercase">{t('language') === 'tr' ? 'Kaldır' : 'Remove'}</span>
                           </div>
                        </div>
                        <span className="text-[10px] font-black mt-2 text-slate-400">{planet.name}</span>
@@ -421,8 +434,9 @@ const SolarSystemSimulation = () => {
                   {sizeOrder.length === 0 && (
                     <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-800 rounded-3xl">
                        <p className="text-slate-600 font-black italic text-center">
-                         Gezegenleri büyükten küçüğe doğru panolden seçerek buraya ekle...<br/>
-                         <span className="text-[10px] opacity-50">(Örn: Önce Jüpiter)</span>
+                         {t('language') === 'tr' ? 'Gezegenleri büyükten küçüğe doğru panolden seçerek buraya ekle...' : 'Add planets from largest to smallest by selecting from the panel...'}
+                         <br/>
+                         <span className="text-[10px] opacity-50">({t('language') === 'tr' ? 'Örn: Önce Jüpiter' : 'Ex: Jupiter first'})</span>
                        </p>
                     </div>
                   )}
@@ -432,15 +446,15 @@ const SolarSystemSimulation = () => {
 
           <div className="mt-8 flex justify-between items-center border-t border-slate-800 pt-6">
             <div className="flex gap-2">
-               {[...Array(QUESTIONS.length)].map((_, i) => (
+               {[...Array(QUESTIONS_LOCALIZED.length)].map((_, i) => (
                  <div key={i} className={`w-3 h-3 rounded-full ${activeStep === i ? 'bg-blue-500' : 'bg-slate-800'}`} />
                ))}
             </div>
             <div className="flex gap-4">
-               <button onClick={resetStep} className="px-6 py-2 rounded-xl text-xs font-black text-slate-500 hover:text-white transition-colors">SIFIRLA</button>
+               <button onClick={resetStep} className="px-6 py-2 rounded-xl text-xs font-black text-slate-500 hover:text-white transition-colors">{t('reset')}</button>
                {feedback.type === 'success' && (
                  <button onClick={nextStep} className="px-8 py-3 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-500 shadow-lg shadow-blue-900/40 animate-bounce">
-                    {activeStep === QUESTIONS.length - 1 ? 'TAMAMLA' : 'SONRAKİ GÖREV'}
+                    {activeStep === QUESTIONS_LOCALIZED.length - 1 ? t('complete') : t('nextMission')}
                  </button>
                )}
             </div>
@@ -448,19 +462,18 @@ const SolarSystemSimulation = () => {
         </div>
       </div>
 
-      {/* Footer Info */}
       <footer className="mt-8 grid grid-cols-3 gap-4">
          <div className="p-4 bg-slate-900/40 rounded-2xl border border-slate-800">
             <h4 className="text-[10px] font-black text-blue-500 uppercase mb-1">Meteor</h4>
-            <p className="text-[9px] text-slate-400">Güneş sistemindeki küçük kaya veya metal parçaları.</p>
+            <p className="text-[9px] text-slate-400">{t('language') === 'tr' ? 'Güneş sistemindeki küçük kaya veya metal parçaları.' : 'Small pieces of rock or metal in the solar system.'}</p>
          </div>
          <div className="p-4 bg-slate-900/40 rounded-2xl border border-slate-800">
-            <h4 className="text-[10px] font-black text-emerald-500 uppercase mb-1">Gök Taşı</h4>
-            <p className="text-[9px] text-slate-400">Yeryüzüne ulaşabilen meteor parçaları.</p>
+            <h4 className="text-[10px] font-black text-emerald-500 uppercase mb-1">{t('language') === 'tr' ? 'Gök Taşı' : 'Meteorite'}</h4>
+            <p className="text-[9px] text-slate-400">{t('language') === 'tr' ? 'Yeryüzüne ulaşabilen meteor parçaları.' : 'Meteor fragments that can reach the Earth\'s surface.'}</p>
          </div>
          <div className="p-4 bg-slate-900/40 rounded-2xl border border-slate-800">
-            <h4 className="text-[10px] font-black text-orange-500 uppercase mb-1">Asteroit</h4>
-            <p className="text-[9px] text-slate-400">Mars ve Jüpiter arasındaki kuşakta bolca bulunurlar.</p>
+            <h4 className="text-[10px] font-black text-orange-500 uppercase mb-1">{t('language') === 'tr' ? 'Asteroit' : 'Asteroid'}</h4>
+            <p className="text-[9px] text-slate-400">{t('language') === 'tr' ? 'Mars ve Jüpiter arasındaki kuşakta bolca bulunurlar.' : 'They are abundant in the belt between Mars and Jupiter.'}</p>
          </div>
       </footer>
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Box, 
   Typography, 
@@ -8,11 +8,9 @@ import {
   Button,
   Divider,
   useTheme,
-  alpha,
-  Slider
+  alpha
 } from '@mui/material';
 import {
-  Add as AddIcon,
   Delete as DeleteIcon,
   RestartAlt as ResetIcon,
   Lightbulb as BulbIcon,
@@ -21,6 +19,7 @@ import {
   Science as ScienceIcon,
   Info as InfoIcon
 } from '@mui/icons-material';
+import { useLanguage } from '../../LanguageContext';
 
 // --- TYPES ---
 interface CircuitElement {
@@ -32,6 +31,7 @@ interface CircuitElement {
 
 const CircuitSimulation: React.FC = () => {
   const theme = useTheme();
+  const { t } = useLanguage();
   const [elements, setElements] = useState<CircuitElement[]>([]);
   const [isSwitchClosed, setIsSwitchClosed] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,12 +41,9 @@ const CircuitSimulation: React.FC = () => {
   const batteryCount = elements.filter(el => el.type === 'battery').length;
   const bulbCount = elements.filter(el => el.type === 'bulb').length;
   
-  // Brightness formula: (batteries / bulbs) * base_multiplier
-  // We'll normalize this to a 0-1 range for styling
   const calculateBrightness = () => {
     if (bulbCount === 0 || batteryCount === 0 || !isSwitchClosed) return 0;
     const ratio = batteryCount / bulbCount;
-    // Cap it at a reasonable max brightness
     return Math.min(ratio * 0.5, 1.5); 
   };
 
@@ -100,25 +97,25 @@ const CircuitSimulation: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.main' }}>
-            Dinamik Devre Laboratuvarı
+            {t('circuitTitle')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Parçaları sürükle-bırak yöntemiyle devreye ekle ve parlaklık değişimini gözlemle.
+            {t('circuitDesc')}
           </Typography>
         </Box>
         <Paper sx={{ p: 2, borderRadius: 4, display: 'flex', gap: 3, bgcolor: alpha(theme.palette.primary.main, 0.05), border: '1px solid', borderColor: 'primary.light' }}>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block' }}>PİL SAYISI</Typography>
+            <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block' }}>{t('batteryCount')}</Typography>
             <Typography variant="h5" sx={{ fontWeight: 900 }}>{batteryCount}</Typography>
           </Box>
           <Divider orientation="vertical" flexItem />
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block' }}>AMPUL SAYISI</Typography>
+            <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block' }}>{t('bulbCount')}</Typography>
             <Typography variant="h5" sx={{ fontWeight: 900 }}>{bulbCount}</Typography>
           </Box>
           <Divider orientation="vertical" flexItem />
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block' }}>PARLAKLIK</Typography>
+            <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block' }}>{t('brightness')}</Typography>
             <Typography variant="h5" sx={{ fontWeight: 900, color: brightness > 0 ? 'warning.main' : 'text.disabled' }}>
               {brightness === 0 ? '%0' : `%${Math.round(brightness * 100)}`}
             </Typography>
@@ -131,7 +128,7 @@ const CircuitSimulation: React.FC = () => {
         {/* Sidebar / Tools */}
         <Paper sx={{ width: 280, p: 3, borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Typography variant="overline" sx={{ fontWeight: 900, color: 'text.secondary', letterSpacing: 1.5 }}>
-            ENSTRÜMANLAR
+            {t('instruments')}
           </Typography>
           
           <Button 
@@ -141,7 +138,7 @@ const CircuitSimulation: React.FC = () => {
             onClick={() => addElement('battery')}
             sx={{ py: 1.5, borderRadius: 3, fontWeight: 800, bgcolor: 'success.main', '&:hover': { bgcolor: 'success.dark' } }}
           >
-            Pil Ekle
+            {t('addBattery')}
           </Button>
 
           <Button 
@@ -151,13 +148,13 @@ const CircuitSimulation: React.FC = () => {
             onClick={() => addElement('bulb')}
             sx={{ py: 1.5, borderRadius: 3, fontWeight: 800, bgcolor: 'warning.main', color: 'black', '&:hover': { bgcolor: 'warning.dark' } }}
           >
-            Ampul Ekle
+            {t('addBulb')}
           </Button>
 
           <Divider />
 
           <Typography variant="overline" sx={{ fontWeight: 900, color: 'text.secondary', letterSpacing: 1.5 }}>
-            KONTROLLER
+            {t('controls')}
           </Typography>
 
           <Button 
@@ -168,7 +165,7 @@ const CircuitSimulation: React.FC = () => {
             color={isSwitchClosed ? "success" : "error"}
             sx={{ py: 1.5, borderRadius: 3, fontWeight: 800, borderWidth: 2, '&:hover': { borderWidth: 2 } }}
           >
-            {isSwitchClosed ? "Anahtarı Aç" : "Anahtarı Kapat"}
+            {isSwitchClosed ? t('switchOpen') : t('switchClose')}
           </Button>
 
           <Button 
@@ -178,18 +175,18 @@ const CircuitSimulation: React.FC = () => {
             onClick={resetCircuit}
             sx={{ mt: 'auto', fontWeight: 800, color: 'text.secondary' }}
           >
-            Devreyi Sıfırla
+            {t('resetCircuit')}
           </Button>
 
           <Box sx={{ p: 2, bgcolor: alpha(theme.palette.info.main, 0.05), borderRadius: 4, border: '1px dashed', borderColor: 'info.main' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <InfoIcon sx={{ fontSize: 16, color: 'info.main' }} />
-              <Typography variant="caption" sx={{ fontWeight: 800, color: 'info.main' }}>BİLGİ</Typography>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'info.main' }}>{t('info')}</Typography>
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, display: 'block' }}>
-              • Pil sayısı arttıkça parlaklık artar.<br/>
-              • Ampul sayısı arttıkça parlaklık azalır.<br/>
-              • Anahtar açıkken akım geçmez.
+              {t('circuitInfo1')}<br/>
+              {t('circuitInfo2')}<br/>
+              {t('circuitInfo3')}
             </Typography>
           </Box>
         </Paper>
@@ -301,10 +298,10 @@ const CircuitSimulation: React.FC = () => {
             }}>
               <ScienceIcon sx={{ fontSize: 60, mb: 2, color: 'text.disabled' }} />
               <Typography variant="h6" color="text.disabled" sx={{ fontWeight: 800 }}>
-                Devre Boş
+                {t('circuitEmpty')}
               </Typography>
               <Typography variant="body2" color="text.disabled">
-                Soldaki menüden parça ekleyerek deneye başlayın.
+                {t('circuitEmptyDesc')}
               </Typography>
             </Box>
           )}

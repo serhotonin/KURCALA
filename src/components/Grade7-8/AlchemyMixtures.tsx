@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useLanguage } from '../../LanguageContext';
 
 // --- TYPES ---
 interface Ingredient {
@@ -53,10 +54,23 @@ const TOOLS: Tool[] = [
 ];
 
 const AlchemyMixtures = () => {
+  const { t } = useLanguage();
   const [selected, setSelected] = useState<Ingredient[]>([]);
   const [phase, setPhase] = useState<'selection' | 'mixed' | 'result'>('selection'); 
   const [isWaterAdded, setIsWaterAdded] = useState(false);
-  const [feedback, setFeedback] = useState({ message: 'Malzemeleri kazana ekleyerek deneye başla!', type: 'info' });
+  const [feedback, setFeedback] = useState({ message: t('alchemyWelcome'), type: 'info' });
+
+  const INGREDIENTS_LOCALIZED = INGREDIENTS.map(i => ({
+    ...i,
+    name: t(`ingredients.${i.id}`),
+    state: i.state === 'Katı' ? (t('language') === 'tr' ? 'Katı' : 'Solid') : (t('language') === 'tr' ? 'Sıvı' : 'Liquid')
+  }));
+
+  const TOOLS_LOCALIZED = TOOLS.map(tool => ({
+    ...tool,
+    name: t(`tools.${tool.id}`),
+    desc: t(`toolDescs.${tool.id}`)
+  }));
 
   // --- CORE ENGINE LOGIC ---
   const analysis = useMemo<AnalysisResult | null>(() => {
@@ -69,51 +83,45 @@ const AlchemyMixtures = () => {
     const solids = items.filter(i => i.state === 'Katı');
     const liquids = items.filter(i => i.state === 'Sıvı');
 
-    // 1. Edge Case: Magnet trap
     const magneticCount = solids.filter(s => s.magnetic).length;
-    if (magneticCount > 1) return { solution: 'none', title: 'HATA!', reason: 'İki madde de manyetik! Mıknatıs ikisini de çeker, ayıramazsın.' };
-    if (magneticCount === 1 && liquids.length === 0 && !isWaterAdded) return { solution: 'magnet', title: 'Manyetik Karışım' };
+    if (magneticCount > 1) return { solution: 'none', title: 'HATA!', reason: t('language') === 'tr' ? 'İki madde de manyetik! Mıknatıs ikisini de çeker, ayıramazsın.' : 'Both substances are magnetic! The magnet will attract both, you cannot separate them.' };
+    if (magneticCount === 1 && liquids.length === 0 && !isWaterAdded) return { solution: 'magnet', title: t('language') === 'tr' ? 'Manyetik Karışım' : 'Magnetic Mixture' };
 
-    // 2. Liquid-Liquid Logic
     if (liquids.length >= 2) {
-      if ((hasWater && hasOil) || (hasAlcohol && hasOil)) return { solution: 'funnel', title: 'Heterojen Sıvı (Emülsiyon)' };
-      if (hasWater && hasAlcohol) return { solution: 'distillation', title: 'Homojen Sıvı (Çözelti)' };
+      if ((hasWater && hasOil) || (hasAlcohol && hasOil)) return { solution: 'funnel', title: t('language') === 'tr' ? 'Heterojen Sıvı (Emülsiyon)' : 'Heterogeneous Liquid (Emulsion)' };
+      if (hasWater && hasAlcohol) return { solution: 'distillation', title: t('language') === 'tr' ? 'Homojen Sıvı (Çözelti)' : 'Homogeneous Liquid (Solution)' };
     }
 
-    // 3. Solid-Solid Logic
     if (solids.length >= 2 && liquids.length === 0 && !isWaterAdded) {
-      if (solids.some(s => s.grain === 'large')) return { solution: 'sieve', title: 'Katı-Katı Heterojen' };
-      if (solids.some(s => s.id === 'tuz') && solids.some(s => s.id === 'seker')) return { solution: 'crystallization', title: 'Tuz-Şeker Karışımı' };
-      return { solution: 'need_water', title: 'Çözme Gerekiyor', reason: 'Bu iki katıyı doğrudan ayıramazsın. Önce "Su Ekle" butonuna basmalısın!' };
+      if (solids.some(s => s.grain === 'large')) return { solution: 'sieve', title: t('language') === 'tr' ? 'Katı-Katı Heterojen' : 'Solid-Solid Heterogeneous' };
+      if (solids.some(s => s.id === 'tuz') && solids.some(s => s.id === 'seker')) return { solution: 'crystallization', title: t('language') === 'tr' ? 'Tuz-Şeker Karışımı' : 'Salt-Sugar Mixture' };
+      return { solution: 'need_water', title: t('language') === 'tr' ? 'Çözme Gerekiyor' : 'Dissolving Required', reason: t('language') === 'tr' ? 'Bu iki katıyı doğrudan ayıramazsın. Önce "Su Ekle" butonuna basmalısın!' : 'You cannot separate these two solids directly. You must first press the "Add Water" button!' };
     }
 
-    // 4. Multi-Step (After Adding Water)
     if (isWaterAdded) {
       const solubleSolids = solids.filter(s => s.solubleInWater);
       const insolubleSolids = solids.filter(s => !s.solubleInWater);
 
       if (insolubleSolids.length > 0) {
-         if (insolubleSolids.some(s => s.id === 'talas')) return { solution: 'flotation', title: 'Yüzen Katı-Sıvı' };
-         return { solution: 'filtration', title: 'Sulu Karışım (Süspansiyon)' };
+         if (insolubleSolids.some(s => s.id === 'talas')) return { solution: 'flotation', title: t('language') === 'tr' ? 'Yüzen Katı-Sıvı' : 'Floating Solid-Liquid' };
+         return { solution: 'filtration', title: t('language') === 'tr' ? 'Sulu Karışım (Süspansiyon)' : 'Aqueous Mixture (Suspension)' };
       }
-      if (solubleSolids.length > 0) return { solution: 'evaporation', title: 'Homojen Çözelti' };
+      if (solubleSolids.length > 0) return { solution: 'evaporation', title: t('language') === 'tr' ? 'Homojen Çözelti' : 'Homogeneous Solution' };
     }
 
-    // 5. Normal Solid-Liquid logic
     if (liquids.length === 1 && solids.length === 1) {
       const liquid = liquids[0];
       const solid = solids[0];
       
-      // Alcohol-Salt Trap
-      if (liquid.id === 'alkol' && solid.id === 'tuz') return { solution: 'filtration', title: 'Alkol-Tuz Karışımı', reason: 'Unutma! Tuz alkolde çözünmez, süzerek ayrılır.' };
+      if (liquid.id === 'alkol' && solid.id === 'tuz') return { solution: 'filtration', title: t('language') === 'tr' ? 'Alkol-Tuz Karışımı' : 'Alcohol-Salt Mixture', reason: t('language') === 'tr' ? 'Unutma! Tuz alkolde çözünmez, süzerek ayrılır.' : 'Remember! Salt does not dissolve in alcohol, it is separated by filtration.' };
       
-      if (liquid.id === 'su' && solid.solubleInWater) return { solution: 'evaporation', title: 'Homojen Çözelti' };
-      if (solid.density < liquid.density) return { solution: 'flotation', title: 'Yüzdürme Gerektiren Karışım' };
-      return { solution: 'filtration', title: 'Heterojen Karışım' };
+      if (liquid.id === 'su' && solid.solubleInWater) return { solution: 'evaporation', title: t('language') === 'tr' ? 'Homojen Çözelti' : 'Homogeneous Solution' };
+      if (solid.density < liquid.density) return { solution: 'flotation', title: t('language') === 'tr' ? 'Yüzdürme Gerektiren Karışım' : 'Mixture Requiring Flotation' };
+      return { solution: 'filtration', title: t('language') === 'tr' ? 'Heterojen Karışım' : 'Heterogeneous Mixture' };
     }
 
-    return { solution: 'complex', title: 'Karışım Hazır' };
-  }, [selected, isWaterAdded]);
+    return { solution: 'complex', title: t('language') === 'tr' ? 'Karışım Hazır' : 'Mixture Ready' };
+  }, [selected, isWaterAdded, t]);
 
   // --- ACTIONS ---
   const toggleSelect = (ing: Ingredient) => {
@@ -128,12 +136,12 @@ const AlchemyMixtures = () => {
   const handleMix = () => {
     if (selected.length < 2) return;
     setPhase('mixed');
-    setFeedback({ message: 'Karışım hazır. Doğru aracı seç veya su ekle!', type: 'warning' });
+    setFeedback({ message: t('mixedFeedback'), type: 'warning' });
   };
 
   const handleAddWater = () => {
     setIsWaterAdded(true);
-    setFeedback({ message: 'Su eklendi! Çözünen maddeler çözüldü. Şimdi ayırma işlemine geçebilirsin.', type: 'info' });
+    setFeedback({ message: t('waterAddedFeedback'), type: 'info' });
   };
 
   const handleToolUse = (toolId: string) => {
@@ -141,9 +149,9 @@ const AlchemyMixtures = () => {
 
     if (toolId === analysis.solution) {
       setPhase('result');
-      setFeedback({ message: 'Tebrikler! Karışımı bilimsel yöntemle başarıyla ayrıştırdın.', type: 'success' });
+      setFeedback({ message: t('successSeparation'), type: 'success' });
     } else {
-      const errorMsg = analysis.reason || 'Hatalı yöntem! Maddelerin özelliklerini tekrar düşün.';
+      const errorMsg = analysis.reason || (t('language') === 'tr' ? 'Hatalı yöntem! Maddelerin özelliklerini tekrar düşün.' : 'Incorrect method! Think about the properties of the substances again.');
       setFeedback({ message: errorMsg, type: 'error' });
     }
   };
@@ -152,13 +160,12 @@ const AlchemyMixtures = () => {
     setSelected([]);
     setPhase('selection');
     setIsWaterAdded(false);
-    setFeedback({ message: 'Laboratuvar temizlendi.', type: 'info' });
+    setFeedback({ message: t('labCleared'), type: 'info' });
   };
 
   return (
     <div className="relative w-full max-w-7xl mx-auto p-12 bg-slate-950 rounded-[50px] border-[8px] border-slate-900 shadow-2xl overflow-hidden text-slate-100 selection:bg-cyan-500/30">
       
-      {/* Background Glows */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
          <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-600 blur-[150px] rounded-full" />
          <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-emerald-600 blur-[150px] rounded-full" />
@@ -166,7 +173,7 @@ const AlchemyMixtures = () => {
 
       <header className="relative z-10 text-center mb-12">
         <h1 className="text-5xl font-black tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-           FEN BİLİMLERİ LABORATUVARI
+           {t('alchemyTitle')}
         </h1>
         <div className={`mt-6 inline-block px-10 py-3 rounded-2xl border-2 transition-all duration-500 backdrop-blur-xl shadow-2xl font-bold
           ${feedback.type === 'success' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 
@@ -180,14 +187,13 @@ const AlchemyMixtures = () => {
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
-        {/* Ingredients */}
         <div className="lg:col-span-3 space-y-4">
-          <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-4 opacity-50">Malzemeler</h2>
+          <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-4 opacity-50">{t('ingredientsLabel')}</h2>
           <div className="grid grid-cols-1 gap-2 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar">
-            {INGREDIENTS.map((ing) => (
+            {INGREDIENTS_LOCALIZED.map((ing) => (
               <button
                 key={ing.id}
-                onClick={() => toggleSelect(ing)}
+                onClick={() => toggleSelect(INGREDIENTS.find(i => i.id === ing.id)!)}
                 disabled={phase !== 'selection'}
                 className={`flex items-center p-4 rounded-3xl border-2 transition-all duration-300
                   ${selected.find(i => i.id === ing.id) 
@@ -207,22 +213,18 @@ const AlchemyMixtures = () => {
           </div>
         </div>
 
-        {/* Cauldron */}
         <div className="lg:col-span-6 flex flex-col items-center justify-center">
           <div className="relative w-80 h-72 md:w-96 md:h-80">
-            {/* Visual Rim */}
             <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-[112%] h-16 bg-slate-800 rounded-full border-b-[10px] border-slate-950 z-40 shadow-2xl" />
             
-            {/* Cauldron Inner */}
             <div className={`absolute inset-0 rounded-b-[140px] rounded-t-[50px] bg-slate-900 border-[10px] border-slate-800 shadow-[inset_0_0_60px_rgba(0,0,0,0.9)] z-10 overflow-hidden transition-all duration-1000
               ${phase === 'mixed' ? 'scale-105' : ''}
             `}>
               <div className="absolute inset-0">
                 {selected.length === 0 && !isWaterAdded && (
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-800 font-black text-sm tracking-widest uppercase italic">Kazan Boş</div>
+                  <div className="absolute inset-0 flex items-center justify-center text-slate-800 font-black text-sm tracking-widest uppercase italic">{t('cauldronEmpty')}</div>
                 )}
 
-                {/* Liquid Visuals */}
                 {selected.filter(i=>i.state==='Sıvı').map((liq, idx) => (
                   <div 
                     key={liq.id} 
@@ -238,7 +240,6 @@ const AlchemyMixtures = () => {
                   <div className="absolute inset-0 bg-cyan-400/30 animate-pulse z-20 backdrop-blur-[1px]" />
                 )}
 
-                {/* Solid Visuals */}
                 <div className="absolute inset-0 z-30 pointer-events-none">
                   {selected.filter(i=>i.state==='Katı').map((sol) => (
                     <div key={sol.id} className={`absolute flex flex-wrap gap-2 p-12 transition-all duration-1000
@@ -255,14 +256,13 @@ const AlchemyMixtures = () => {
                 {phase === 'result' && (
                   <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-2xl z-50 flex flex-col items-center justify-center animate-in zoom-in duration-500">
                     <span className="text-9xl mb-4 animate-bounce">✨</span>
-                    <h3 className="text-3xl font-black text-emerald-400 tracking-tighter">AYRIŞTIRILDI!</h3>
-                    <button onClick={reset} className="mt-8 px-12 py-4 bg-emerald-600 text-white rounded-full font-black tracking-widest hover:bg-emerald-500 shadow-xl shadow-emerald-900/40">YENİ DENEY</button>
+                    <h3 className="text-3xl font-black text-emerald-400 tracking-tighter">{t('separated')}</h3>
+                    <button onClick={reset} className="mt-8 px-12 py-4 bg-emerald-600 text-white rounded-full font-black tracking-widest hover:bg-emerald-500 shadow-xl shadow-emerald-900/40">{t('newExperiment')}</button>
                   </div>
                 )}
               </div>
             </div>
             
-            {/* Fire */}
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-20 flex items-end justify-center gap-1">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="w-4 bg-orange-600/40 rounded-full animate-pulse blur-sm" style={{ height: `${20 + Math.random()*30}px`, animationDelay: `${i*0.2}s` }} />
@@ -279,28 +279,27 @@ const AlchemyMixtures = () => {
                   ${selected.length === 2 ? 'bg-gradient-to-r from-blue-600 to-emerald-600 text-white shadow-2xl hover:scale-110 active:scale-95' : 'bg-slate-900 text-slate-700 border-2 border-slate-800 opacity-40'}
                 `}
               >
-                KARIŞTIR
+                {t('mix')}
               </button>
             ) : (
               <>
                 {!isWaterAdded && analysis?.solution === 'need_water' && (
                    <button onClick={handleAddWater} className="px-12 py-5 rounded-[30px] bg-cyan-600 text-white font-black tracking-widest hover:bg-cyan-500 animate-pulse shadow-xl shadow-cyan-900/40">
-                      💧 SU EKLE (ÇÖZME)
+                      {t('addWater')}
                    </button>
                 )}
                 <button onClick={reset} className="px-12 py-5 rounded-[30px] bg-slate-900 text-slate-400 font-black border-2 border-slate-800 hover:text-white transition-all shadow-xl">
-                   TEMİZLE
+                   {t('clear')}
                 </button>
               </>
             )}
           </div>
         </div>
 
-        {/* Tools */}
         <div className="lg:col-span-3 space-y-4">
-          <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-4 opacity-50">Ayırma Araçları</h2>
+          <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-4 opacity-50">{t('toolsLabel')}</h2>
           <div className="grid grid-cols-1 gap-3 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar">
-            {TOOLS.map((tool) => (
+            {TOOLS_LOCALIZED.map((tool) => (
               <button
                 key={tool.id}
                 onClick={() => handleToolUse(tool.id)}

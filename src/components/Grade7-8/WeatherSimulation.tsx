@@ -6,10 +6,9 @@ import {
   WaterDrop as WaterDropIcon, 
   Speed as SpeedIcon, 
   HelpOutlined as HelpOutlineIcon, 
-  CheckCircle as CheckCircleIcon, 
-  Cancel as CancelIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
+import { useLanguage } from '../../LanguageContext';
 
 // --- Animations ---
 const float = keyframes`
@@ -84,21 +83,21 @@ interface ComparisonData {
 const AnimatedWeatherIcon: React.FC<{ code: string }> = ({ code }) => {
   const type = code.substring(0, 2);
 
-  if (type === '01') { // Clear sky
+  if (type === '01') { 
     return (
       <Box sx={{ animation: `${spin} 10s linear infinite`, color: '#facc15', fontSize: 64, filter: 'drop-shadow(0 0 10px rgba(250, 204, 21, 0.4))' }}>
         ☀️
       </Box>
     );
   }
-  if (type === '02' || type === '03' || type === '04') { // Clouds
+  if (type === '02' || type === '03' || type === '04') { 
     return (
       <Box sx={{ animation: `${float} 3s ease-in-out infinite`, fontSize: 64, filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.2))' }}>
         ☁️
       </Box>
     );
   }
-  if (type === '09' || type === '10') { // Rain
+  if (type === '09' || type === '10') { 
     return (
       <Box sx={{ position: 'relative', fontSize: 64 }}>
         🌧️
@@ -113,14 +112,14 @@ const AnimatedWeatherIcon: React.FC<{ code: string }> = ({ code }) => {
       </Box>
     );
   }
-  if (type === '11') { // Thunderstorm
+  if (type === '11') { 
     return (
       <Box sx={{ animation: `${pulse} 0.5s ease-in-out infinite`, fontSize: 64, filter: 'drop-shadow(0 0 15px rgba(255, 255, 0, 0.6))' }}>
         ⚡
       </Box>
     );
   }
-  if (type === '13') { // Snow
+  if (type === '13') { 
     return (
       <Box sx={{ animation: `${float} 4s ease-in-out infinite`, fontSize: 64, filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))' }}>
         ❄️
@@ -132,6 +131,7 @@ const AnimatedWeatherIcon: React.FC<{ code: string }> = ({ code }) => {
 
 const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
   const theme = useTheme();
+  const { t } = useLanguage();
   const [data, setData] = useState<ComparisonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -149,7 +149,7 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
       setData(result);
       setError(null);
     } catch (err) {
-      setError("Hava durumu verileri yüklenirken bir hata oluştu.");
+      setError(t('weatherError'));
     } finally {
       setLoading(false);
     }
@@ -162,14 +162,14 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
   if (loading) return (
     <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: 400, gap: 2 }}>
       <CircularProgress size={60} thickness={5} sx={{ color: 'secondary.main' }} />
-      <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>İstasyon Verileri Alınıyor...</Typography>
+      <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>{t('stationDataLoading')}</Typography>
     </Box>
   );
 
   if (error || !data) return (
     <Box sx={{ p: 4, textAlign: 'center' }}>
       <Alert severity="error" variant="filled" sx={{ borderRadius: 4, justifyContent: 'center' }}>{error}</Alert>
-      <Button variant="contained" color="primary" onClick={fetchData} sx={{ mt: 3, px: 4, borderRadius: 10, fontWeight: 800 }}>TEKRAR DENE</Button>
+      <Button variant="contained" color="primary" onClick={fetchData} sx={{ mt: 3, px: 4, borderRadius: 10, fontWeight: 800 }}>{t('tryAgain')}</Button>
     </Box>
   );
 
@@ -185,31 +185,31 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
   const questions = [
     {
       id: 'wind',
-      question: 'Yüksek basınçtan alçak basınca olan hava hareketini düşünerek; rüzgar hangi yöne doğru eser?',
+      question: t('windQuestion'),
       options: [
         { label: `${data.esenler.name} -> ${data.random.name}`, value: 'e_to_r' },
         { label: `${data.random.name} -> ${data.esenler.name}`, value: 'r_to_e' },
-        { label: `Rüzgar oluşmaz / Belirgin bir yön yoktur`, value: 'none' }
+        { label: t('windOption3'), value: 'none' }
       ],
       correct: windCorrect
     },
     {
       id: 'pressure_type',
-      question: `Basınç değerlerine göre hangi şehirde "Yükselici Hava Hareketi" (Alçak Basınç) görülmektedir?`,
+      question: t('pressureQuestion'),
       options: [
         { label: data.esenler.name, value: 'esenler' },
         { label: data.random.name, value: 'random' },
-        { label: `Her iki şehirde de basınç özellikleri aynıdır`, value: 'none' }
+        { label: t('pressureOption3'), value: 'none' }
       ],
       correct: pressureCorrect
     },
     {
         id: 'humidity_logic',
-        question: 'Hangi bölgede bulutlanma ve yağış görülme ihtimali daha yüksektir?',
+        question: t('humidityQuestion'),
         options: [
-            { label: `Nem oranı yüksek olan şehir`, value: 'high_hum' },
-            { label: `Nem oranı düşük olan şehir`, value: 'low_hum' },
-            { label: `Nem oranları eşit / İhtimal aynıdır`, value: 'none' }
+            { label: t('humidityOption1'), value: 'high_hum' },
+            { label: t('humidityOption2'), value: 'low_hum' },
+            { label: t('humidityOption3'), value: 'none' }
         ],
         correct: humidityCorrect
     }
@@ -229,10 +229,10 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
 
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
           {[
-            { icon: <ThermostatIcon color="error" />, label: 'SICAKLIK', value: `${city.temp}°C` },
-            { icon: <AirIcon color="primary" />, label: 'BASINÇ', value: `${city.pressure} hPa` },
-            { icon: <WaterDropIcon color="info" />, label: 'NEM', value: `%${city.humidity}` },
-            { icon: <SpeedIcon color="success" />, label: 'RÜZGAR', value: `${city.windSpeed} m/s` }
+            { icon: <ThermostatIcon color="error" />, label: t('temperature'), value: `${city.temp}°C` },
+            { icon: <AirIcon color="primary" />, label: t('pressure').toUpperCase(), value: `${city.pressure} hPa` },
+            { icon: <WaterDropIcon color="info" />, label: t('humidity'), value: `%${city.humidity}` },
+            { icon: <SpeedIcon color="success" />, label: t('wind').toUpperCase(), value: `${city.windSpeed} m/s` }
           ].map((item, i) => (
             <Paper key={i} elevation={0} sx={{ 
               p: 1.5, 
@@ -250,7 +250,7 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
         </Box>
 
         <Divider sx={{ my: 3, borderColor: 'divider' }} />
-        <Typography sx={{ textTransform: 'capitalize', fontWeight: 700, textAlign: 'center', color: 'secondary.main', bgcolor: 'secondary.main', backgroundClip: 'text', color: 'transparent', backgroundImage: 'linear-gradient(45deg, #3b82f6, #8b5cf6)' }}>
+        <Typography sx={{ textTransform: 'capitalize', fontWeight: 700, textAlign: 'center', color: 'transparent', backgroundClip: 'text', backgroundImage: 'linear-gradient(45deg, #3b82f6, #8b5cf6)' }}>
           {city.description}
         </Typography>
       </CardContent>
@@ -260,11 +260,10 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
   return (
     <Box sx={{ width: '100%', p: { xs: 1, md: 3 }, minHeight: '100%', bgcolor: 'background.default' }}>
       <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 4 }}>
-        {/* Left Side - Weather Info */}
         <Box sx={{ flex: { xs: '1 1 100%', lg: '1 1 50%' }, display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h4" sx={{ fontWeight: 900, color: 'text.primary', letterSpacing: -1.5 }}>
-              Atmosfer <span style={{ color: theme.palette.primary.main }}>Gözlemi</span>
+              {t('atmosphereObservation').split(' ')[0]} <span style={{ color: theme.palette.primary.main }}>{t('atmosphereObservation').split(' ')[1]}</span>
             </Typography>
             <IconButton onClick={fetchData} sx={{ bgcolor: 'background.paper', boxShadow: 3, '&:hover': { bgcolor: 'primary.main', color: 'white' } }}>
               <RefreshIcon />
@@ -272,12 +271,11 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
           </Box>
           
           <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-            <WeatherCard title="MERKEZ İSTASYON" city={data.esenler} />
-            <WeatherCard title="UZAK İSTASYON" city={data.random} isAccent />
+            <WeatherCard title={t('mainStation')} city={data.esenler} />
+            <WeatherCard title={t('remoteStation')} city={data.random} isAccent />
           </Box>
         </Box>
 
-        {/* Right Side - Questions */}
         <Box sx={{ flex: { xs: '1 1 100%', lg: '1 1 40%' } }}>
           <Paper elevation={0} sx={{ 
             p: 4, 
@@ -291,7 +289,7 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
               <Box sx={{ bgcolor: 'secondary.main', p: 1, borderRadius: 2.5, display: 'flex', boxShadow: '0 4px 12px rgba(156, 39, 176, 0.3)' }}>
                 <HelpOutlineIcon sx={{ color: 'white' }} />
               </Box>
-              BİLİMSEL ANALİZ
+              {t('scientificAnalysis')}
             </Typography>
             
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -375,7 +373,7 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
                 onClick={() => setSubmitted(true)}
                 disabled={Object.keys(answers).length < questions.length}
               >
-                Gözlemi Onayla
+                {t('confirmObservation')}
               </Button>
             ) : (
               <Button 
@@ -385,7 +383,7 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
                 sx={{ mt: 3, py: 1.5, borderRadius: 4, fontWeight: 800, textTransform: 'none' }} 
                 onClick={fetchData}
               >
-                Farklı Şehirleri İncele
+                {t('examineDifferentCities')}
               </Button>
             )}
           </Paper>
@@ -407,10 +405,9 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
           <AirIcon sx={{ fontSize: 40, color: 'white' }} />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5, letterSpacing: 0.5 }}>AKADEMİK NOT</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5, letterSpacing: 0.5 }}>{t('academicNote')}</Typography>
           <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 500, lineHeight: 1.5 }}>
-            Rüzgar, yüksek basınç (soğuk/yoğun) alanından alçak basınç (sıcak/seyrek) alanına doğru gerçekleşen yatay yönlü hava hareketidir. 
-            Basınç farkı ne kadar fazlaysa, hava akımı o denli şiddetlenir.
+            {t('weatherAcademicNote')}
           </Typography>
         </Box>
       </Paper>
