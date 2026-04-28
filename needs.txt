@@ -1,0 +1,132 @@
+8. SINIF FEN BİLİMLERİ YENİ NESİL TARAMA SINAVI
+Soru 1: Mevsimler ve Gölge Boyu Analizi
+Test Edilen Kazanımlar: F.8.1.1.1. Mevsimlerin oluşumuna yönelik tahminlerde bulunur.
+Bir araştırmacı, K ve L şehirlerinde yıl boyunca yere dik olarak yerleştirdiği özdeş çubukların öğle vakti gölge boylarını ölçmüş ve aşağıdaki verileri elde etmiştir:
+K şehri: Gölge boyu yıl boyunca hiçbir zaman sıfır olmamıştır. En kısa gölge boyu 21 Haziran tarihinde ölçülmüştür.
+L şehri: Gölge boyu yılda iki kez sıfır olmuştur. 21 Aralık tarihindeki gölge boyu, 21 Haziran tarihindeki gölge boyundan daha uzundur.
+Araştırmacı bu şehirlerin Dünya üzerindeki konumlarını bir modele işaretleyecektir.
+Buna göre araştırmacının verileri ve şehirlerin konumları ile ilgili aşağıdakilerden hangisi yanlıştır?
+A) K şehri Yengeç Dönencesi ile Kuzey Kutup Noktası arasında bir konumda yer almaktadır.
+B) L şehrine güneş ışınlarının dik düştüğü tarihler, 21 Mart ve 23 Eylül ekinoks tarihleridir.
+C) 21 Aralık tarihinde K şehrinde yaşanan gündüz süresi, L şehrinde yaşanan gündüz süresinden daha kısadır.
+D) L şehri Ekvator çizgisi ile Yengeç Dönencesi arasında bir enlemde bulunmaktadır.
+
+Soru 2: Kalıtım, Modifikasyon ve Çaprazlama Entegrasyonu
+Test Edilen Kazanımlar: F.8.2.2.2. Tek karakter çaprazlamaları ile ilgili problemler çözer. / F.8.2.3.1. Mutasyon ve modifikasyonu açıklar. / F.8.2.4.1. Canlıların yaşadıkları çevreye uyumlarını gözlem yaparak açıklar.
+"Aequorea" isimli kurgusal bir bitki türünde, yaprak genişliği genetik bir özellik olup geniş yapraklılık geni (A), dar yapraklılık genine (a) baskındır. Aynı bitkinin çiçek rengi ise yetiştiği toprağın mineral yapısına göre değişmektedir; magnezyumca zengin toprakta mor, fakir toprakta ise beyaz çiçek açmaktadır.
+Bir araştırmacı melez döl (heterozigot) geniş yapraklı iki Aequorea bitkisini çaprazlamış ve elde ettiği tohumların tamamını magnezyumca zengin toprağa ekmiştir.
+Bu deneyin sonuçlarıyla ilgili olarak yapılan aşağıdaki yorumlardan hangisi kesinlikle doğrudur?
+A) Elde edilen bitkilerin dar yapraklı olma ihtimali %25'tir ve bu durum çevre şartlarının genlerin işleyişini değiştirmesiyle açıklanır.
+B) Oluşan yeni nesil bitkilerin tamamı mor çiçekli ve geniş yapraklı (Aa veya AA) genotipine sahip olacaktır.
+C) Bitkilerin mor çiçekli olması modifikasyon örneğidir ve bu bitkilerden alınacak tohumlar magnezyumca fakir toprağa ekilirse genotipleri ne olursa olsun beyaz çiçek açarlar.
+D) Çaprazlama sonucu elde edilen tohumların %50'si melez döl geniş yapraklı olup, bu özellik nesilden nesile aktarılabilen bir mutasyon sonucudur.
+
+Soru 3: Katı ve Gaz Basıncı Birleşik Sistem Analizi
+Test Edilen Kazanımlar: F.8.3.1.1. Katı basıncını etkileyen değişkenleri deneyerek keşfeder. / F.8.3.1.3. Katı ve gazların basınç özelliklerinin günlük yaşam uygulamalarına örnekler verir.
+Sürtünmesiz sızdırmaz bir piston ile kapatılmış kabın içerisinde bir miktar gaz bulunmaktadır. Pistonun üzerine ağırlığı $G$, yüzey alanı $S$ olan özdeş tuğlalardan 3 tanesi üst üste konularak Şekil 1'deki sistem dengede tutulmuştur. Bu durumda tuğlaların pistona yaptığı katı basıncı $P_{katı}$, kap içindeki gazın basıncı ise $P_{gaz}$ olarak ölçülmüştür.
+Daha sonra en üstteki bir tuğla alınıp, kalan iki tuğla yan yana piston üzerine dizilerek (toplam temas yüzeyi $2S$ olacak şekilde) Şekil 2'deki yeni denge durumu oluşturulmuştur. (Dış basınç ve sıcaklık sabittir).
+Şekil 1'den Şekil 2'ye geçilirken meydana gelen değişimlerle ilgili aşağıdaki ifadelerden hangisi doğrudur?
+A) Tuğlaların pistona uyguladığı katı basıncı azalmıştır, çünkü toplam ağırlık azalırken temas yüzeyi artmıştır.
+B) Kap içindeki gaz basıncı artmıştır, çünkü tuğlaların temas yüzeyinin artması pistonun aşağı inmesine neden olmuştur.
+C) Pistona etki eden toplam kuvvet değişmediği için kap içindeki gaz basıncı ($P_{gaz}$) sabit kalmıştır.
+D) Tuğlaların pistona uyguladığı katı basıncı yarıya düşmüştür, gaz basıncı ise tuğla sayısı azaldığı için artmıştır.
+
+Soru 4: Kimyasal Tepkimeler ve Asit-Baz Karakteristiği
+Test Edilen Kazanımlar: F.8.4.3.1. Kimyasal tepkimelerin oluşumunu açıklar. / F.8.4.4.1. Asit ve bazların genel özelliklerini ifade eder.
+Kapalı bir kapta gerçekleşen kimyasal bir tepkimeye ait maddelerin kütlelerinin zamanla değişim grafiği verilmiştir (Bu detayı öğrenci zihninde canlandırmalıdır):
+Grafikte $X$ ve $Y$ maddelerinin kütlesi zamanla azalırken tamamen tükenmiş, $Z$ ve $T$ maddelerinin kütlesi ise sıfırdan başlayarak artmıştır.
+Tepkime sonunda oluşan maddelerden;
+$Z$ maddesinin sulu çözeltisine fenolftalein damlatıldığında pembe renk aldığı,
+$T$ maddesinin sulu çözeltisinin mavi turnusol kağıdının rengini kırmızıya çevirdiği gözlemlenmiştir.
+Bu kimyasal tepkime ve maddelerle ilgili aşağıda yapılan çıkarımlardan hangisine ulaşılamaz?
+A) $X$ ve $Y$ maddelerinin toplam kütlesi, oluşan $Z$ ve $T$ maddelerinin toplam kütlesine eşittir.
+B) $Z$ maddesinin pH değeri 7'den büyüktür ve ele kayganlık hissi veren bir yapıdadır.
+C) $T$ maddesi metallerle tepkimeye girerek hidrojen gazı açığa çıkarabilir ve mermer yüzeyleri aşındırabilir.
+D) Bu tepkime bir nötralleşme (asit-baz) tepkimesidir ve $X$ ile $Y$ maddeleri kesinlikle tuz ve sudur.
+
+Soru 5: Karmaşık Basit Makine Sistemleri ve İş Prensibi
+Test Edilen Kazanımlar: F.8.5.1.1. Basit makinelerin sağladığı avantajları örnekler üzerinden açıklar. / F.8.5.1.2. Basit makine çeşitlerini tasarlar.
+Bir öğrenci, ağır bir $P$ yükünü belirli bir yüksekliğe çıkarmak için eğik düzlem, hareketli makara ve destek noktası ortada olan bir kaldıraçtan oluşan bileşik bir basit makine sistemi tasarlamıştır. Sistemde;
+Kaldıracın bir ucuna uygulanan $F$ kuvveti, kaldıracın diğer ucuna bağlı ipi çekmektedir.
+İp, eğik düzlem üzerindeki hareketli makaraya dolanmıştır.
+$P$ yükü hareketli makaraya asılıdır ve eğik düzlem üzerinde yukarı çekilmektedir.
+(Sürtünmeler, makara ve kaldıraç çubuğunun ağırlığı önemsenmemektedir).
+Öğrenci sistemde uyguladığı $F$ kuvvetinin büyüklüğünü azaltmak istemektedir.
+Buna göre öğrenci;
+I. Kaldıracın destek noktasını kuvvet uygulanan uca yaklaştırmak.
+II. Eğik düzlemin yüksekliğini sabit tutup, boyunu uzatmak.
+III. Hareketli makara yerine sabit makara kullanmak.
+işlemlerinden hangilerini tek başına yaparsa amacına kesinlikle ulaşır?
+A) Yalnız I
+B) Yalnız II
+C) I ve II
+D) II ve III
+
+Cevap Anahtarı: 1-D, 2-C, 3-A, 4-D, 5-B
+
+
+Soru 1: Çöllerdeki Yüksek Basınç Yanılgısı
+Soru 1
+Labs platformundaki bir simülasyonda iklim bilimci olarak çalışan bir öğrenci, Dünya haritası üzerindeki X bölgesinde havanın sürekli alçalıcı (çökücü) bir hareket yaptığını gözlemliyor. Öğrenci bu veriye dayanarak "Bu bölge kesinlikle yüksek basınç alanıdır ve hava sıcaklığı çok düşüktür" hipotezini kuruyor.
+Sokratik asistanın, öğrencinin hipotezindeki KAVRAM YANILGISINI (hatayı) fark etmesini sağlamak için ona aşağıdaki gerçek dünya örneklerinden hangisini sunması en uygundur?
+A) Ekvator bölgesinde yıl boyunca görülen yükselici hava hareketleri ve bol yağış rejimi.
+B) Kutuplardaki alçalıcı hava hareketleri ve kalıcı buzulların varlığı.
+C) 30 derece enlemlerindeki büyük Sahra Çölü'nde gündüz 50°C'yi aşan sıcaklıklara rağmen oluşan dinamik yüksek basınç alanları.
+D) Gündüzleri denizden karaya doğru esen ve serinletici etki yapan meltem rüzgarları.
+Doğru Cevap: C
+Açıklama: Öğrencinin ezberi "Hava soğuksa çöker ve yüksek basınç oluşturur" şeklindedir. Ancak çöller çok sıcak olmalarına rağmen alçalıcı hava (yüksek basınç) alanlarıdır. Yüksek basınç, havanın termometrik soğukluğundan değil, kütlesel çöküşünden kaynaklanır.
+
+
+Soru 2: Farklı Şekilli Kaplarda Eşit Hacimde Sıvı
+
+
+Soru 2
+Bir öğrenci "Sıvı Basıncı" konusunu incelerken taban alanları tamamen birbirine eşit üç farklı cam kap kullanıyor: K kabı (düz silindir), L kabı (yukarı doğru daralan huni şeklinde), M kabı (yukarı doğru genişleyen vazo şeklinde). Öğrenci bu üç kaba, TAMAMEN AYNI HACİMDE (eşit miktarda) ve aynı cins suyu döküyor.
+Kaplardan hiç su taşmadığına göre, sıvıların kap tabanlarında oluşturduğu basınçlar ($P_K$, $P_L$, $P_M$) arasındaki büyüklük ilişkisi nasıldır?
+A) $P_K = P_L = P_M$
+B) $P_L > P_K > P_M$
+C) $P_M > P_K > P_L$
+D) Sıvı hacimleri eşit olduğu için basınçlar kabın şekline göre değil, ağırlık merkezine göre hesaplanır, bu verilerle bulunamaz.
+Doğru Cevap: B
+Açıklama: Eşit hacimde sıvı döküldüğünde; L kabı yukarı daraldığı için sıvı daha çok yükselmek zorunda kalır ($h$ en büyük). M kabı yukarı genişlediği için sıvı yayılır ve daha az yükselir ($h$ en küçük). $P = h \cdot d \cdot g$ formülünde $d$ ve $g$ sabitken, derinliği ($h$) en fazla olan L kabının tabanındaki basınç en büyüktür.
+
+
+Soru 3: 45 Yıllık İklim vs. 2 Yıllık Kuraklık
+Soru 3
+Bir iklim bilimci, A şehrine ait 45 yıllık verileri analiz ederek "Bu şehir kesinlikle Karadeniz iklimi kuşağındadır, her mevsim yağış alır" sonucuna varıyor. Ancak son 2 yıla ait meteorolojik raporlarda, yaz aylarında hiç yağış düşmediği ve şiddetli kuraklık yaşandığı görülüyor.
+Bu durumun Fen Bilimleri açısından EN BİLİMSEL açıklaması aşağıdakilerden hangisidir?
+A) İklim, 40-50 yıllık uzun verilerin ortalamasıdır. Son 2 yıldaki kuraklık ekstrem hava olayıdır ve iklimin hemen değiştiğini kanıtlamaz.
+B) A şehrinin iklimi son 2 yılda yaşanan bu kuraklık sebebiyle tamamen Karasal İklime dönüşmüştür.
+C) Hava olayları tahmini, iklim verileri ise kesin olduğu için son 2 yıla ait meteorolojik raporların hatalı ölçüldüğü kabul edilmelidir.
+D) İklim özellikleri sadece enlem derecelerine bağlı olduğu için, dünyanın güneş etrafındaki yörüngesi değişmeden yağış rejimi değişemez.
+Doğru Cevap: A
+Açıklama: İklim geniş zamanlı ortalamalardır. Kısa vadeli sapmalar (2 yıl) doğrudan iklim değişikliği olarak değil, ekstrem meteorolojik olaylar veya uzun vadeli bir iklim krizinin başlangıç sinyalleri olarak değerlendirilir, iklim sınıflandırmasını anında değiştirmez.
+
+
+Soru 4: Pascal Prensibi ve Cıva/Su Değişimi
+
+
+Soru 4
+Laboratuvar defteri modülünde bir deney tasarlayan öğrenci, kapalı bir hidrolik kriko sistemi (Pascal prensibi) kuruyor. Öğrenci, küçük pistona uyguladığı F kuvveti ile büyük pistonun üzerindeki aracı ancak dengede tutabiliyor. Sistemi daha VERİMLİ hale getirmek (aracı daha KÜÇÜK bir kuvvetle kaldırmak) isteyen öğrenci, sistemin içindeki suyu boşaltıp yerine yoğunluğu çok daha büyük olan Cıva sıvısı dolduruyor.
+Bu değişiklik sistemde nasıl bir sonuç doğurur?
+A) Cıvanın yoğunluğu büyük olduğu için basıncı daha şiddetli iletir, araç çok daha küçük bir kuvvetle kaldırılabilir.
+B) Pascal prensibinde kapalı sistemdeki sığ sıvılar basıncı aynen ilettiğinden, sıvının cinsinin değişmesi statik denge durumunda uygulanması gereken F kuvvetini değiştirmez.
+C) Cıvanın kendi ağırlığı daha fazla olacağı için, küçük pistona uygulanması gereken kuvvet azalmaz, tam tersine artar.
+D) Yoğunluk arttığı için cıvanın sıkışabilirlik oranı düşer ve kuvvet iletimi imkansız hale gelir, sistem kilitlenir.
+Doğru Cevap: B
+Açıklama: $\frac{F}{S} = \frac{G}{A}$ eşitliğinde, sıvının yoğunluk ($d$) değişkeni formülde yer almaz. Pascal prensibinde sıvılar basıncı (kuvveti değil) büyüklüğünü değiştirmeden aynen iletir. Sıvının değişmesi kuvvet kazancını etkilemez.
+
+
+Soru 5: Silindire Su Akarken Tuz Eklenmesi
+
+Soru 5
+İçerisinde bir miktar su bulunan, düz silindirik şekilli bir kaba dışarıdan sabit debili bir muslukla su akıtılmaktadır. Musluk açıldıktan bir süre sonra kapatılıyor. Ardından kaba bir miktar tuz atılıp tamamen çözünmesi bekleniyor (tuzun hacimsel artışı ihmal ediliyor).
+Bu sürecin başından sonuna kadar, kabın tabanındaki sıvı basıncının zamana göre değişimini çizen bir grafik AŞAĞIDAKİ ÖZELLİKLERDEN HANGİSİNİ kesinlikle barındırmalıdır?
+A) Grafik sıfır (orijin) noktasından başlamalı ve tuz atıldığında basınç sabit kalmalıdır.
+B) Grafik sıfırdan farklı bir değerden başlamalı, musluk akarken doğrusal artmalı, tuz atıldığında ise yoğunluk artacağı için basınç değeri yukarı yönde artış göstermelidir.
+C) Grafik sıfırdan farklı bir değerden başlamalı, tuz atıldığında ise suyun yüksekliği ($h$) değişmeyeceği için sıvı basıncı tamamen sabit bir yatay çizgi olarak kalmalıdır.
+D) Grafik orijinden başlamalı, musluk akarken parabolik (eğrisel) olarak artmalı, tuz eklendiğinde ise aniden sıfıra düşmelidir.
+Doğru Cevap: B
+Açıklama: Kapta başlangıçta su olduğu için basınç $P > 0$'dan başlar. Silindir kap ve sabit musluk olduğu için basınç doğrusal (düz çizgi) artar. Tuz çözündüğünde sıvının derinliği ($h$) değişmese de yoğunluğu ($d$) artacağı için $P = h \cdot d \cdot g$ gereği basınç artış gösterir.
+
+

@@ -285,7 +285,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
           )}
           <List>
             {[
-              { label: t('notifications'), icon: <NotificationsIcon />, path: '/notifications' },
               { label: t('contactUs'), icon: <ContactIcon />, path: '/contact' },
               { label: t('settings'), icon: <SettingsIcon />, path: '/settings' },
             ].map((item) => (

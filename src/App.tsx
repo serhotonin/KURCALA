@@ -7,12 +7,19 @@ import Sidebar from './components/Sidebar';
 import GradeView from './components/GradeView';
 import GeminiChat from './components/GeminiChat';
 import Dashboard from './components/Dashboard';
-import Notifications from './components/Notifications';
 import Settings from './components/Settings';
 import Contact from './components/Contact';
 
 const App: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  React.useEffect(() => {
+    const handleCollapse = (e: any) => {
+      setSidebarCollapsed(e.detail);
+    };
+    window.addEventListener('sidebar-collapse', handleCollapse);
+    return () => window.removeEventListener('sidebar-collapse', handleCollapse);
+  }, []);
 
   return (
     <ThemeContextProvider>
@@ -35,7 +42,6 @@ const App: React.FC = () => {
               <Route path="/" element={<Dashboard />} />
               <Route path="/grade/:gradeId" element={<GradeView />} />
               <Route path="/gemini" element={<GeminiChat />} />
-              <Route path="/notifications" element={<Notifications />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<Navigate to="/" replace />} />

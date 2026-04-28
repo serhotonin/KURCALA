@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -44,6 +44,7 @@ import AlchemyMixtures from './Grade7-8/AlchemyMixtures';
 import AcidBaseSimulation from './Grade7-8/AcidBaseSimulation';
 import PressureSimulation from './Grade7-8/PressureSimulation';
 import WeatherSimulation from './Grade7-8/WeatherSimulation';
+import CompetitionQuiz from './CompetitionQuiz';
 
 // --- Styled Components ---
 const ExperimentCard = styled(Card)(({ theme }) => ({
@@ -116,8 +117,9 @@ interface LabNote {
 
 const GradeView: React.FC = () => {
   const { gradeId } = useParams<{ gradeId: string }>();
+  const location = useLocation();
   const theme = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const [viewState, setViewState] = useState<'list' | 'briefing' | 'simulation'>('list');
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
@@ -131,17 +133,24 @@ const GradeView: React.FC = () => {
 
   // Reset state when grade changes
   useEffect(() => {
-    setViewState('list');
-    setActiveTopic(null);
+    const state = location.state as { activeTopic?: string };
+    if (state?.activeTopic) {
+      setActiveTopic(state.activeTopic);
+      setViewState('briefing');
+      fetchNotes(state.activeTopic);
+    } else {
+      setViewState('list');
+      setActiveTopic(null);
+    }
     setMissionComplete(false);
     setNotebookOpen(false);
-  }, [gradeId]);
+  }, [gradeId, location.state]);
 
   const topics = {
-    '5': [t('topics.friction'), t('topics.circuits')],
-    '6': [t('topics.solar'), t('topics.density')],
-    '7': [t('topics.mixtures'), t('topics.acidBase')],
-    '8': [t('topics.pressure'), t('topics.weather')],
+    '5': [t('topics.circuits')],
+    '6': [t('topics.solar')],
+    '7': [t('topics.mixtures')],
+    '8': [t('topics.weather'), t('topics.competition')],
   }[gradeId || '5'] || [];
 
   const fetchNotes = (topic: string) => {
@@ -206,6 +215,7 @@ const GradeView: React.FC = () => {
     const t_acidBase = t('topics.acidBase');
     const t_pressure = t('topics.pressure');
     const t_weather = t('topics.weather');
+    const t_competition = t('topics.competition');
 
     if (activeTopic === t_mixtures) return <AlchemyMixtures />;
     if (activeTopic === t_solar) return <SolarSystemSimulation />;
@@ -215,6 +225,7 @@ const GradeView: React.FC = () => {
     if (activeTopic === t_acidBase) return <AcidBaseSimulation sandbox={sandboxMode} />;
     if (activeTopic === t_pressure) return <PressureSimulation sandbox={sandboxMode} />;
     if (activeTopic === t_weather) return <WeatherSimulation sandbox={sandboxMode} />;
+    if (activeTopic === t_competition) return <CompetitionQuiz onExit={() => setViewState('list')} />;
     
     return (
        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, py: 10 }}>
@@ -244,38 +255,56 @@ const GradeView: React.FC = () => {
           justifyContent: 'center',
           alignItems: 'stretch'
         }}>
-          {topics.map((topic, index) => (
-            <ExperimentCard key={index}>
-              <CardActionArea onClick={() => handleStartSimulation(topic)} sx={{ height: '100%', p: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
-                <IconWrapper>
-                  <ScienceIcon sx={{ fontSize: 32 }} />
-                </IconWrapper>
-                <CardContent sx={{ p: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h4" sx={{ fontWeight: 900, mb: 1, lineHeight: 1.1, fontSize: '1.8rem' }}>
-                    {topic}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5, color: 'text.secondary' }}>
-                    <TimeIcon sx={{ fontSize: 18 }} />
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>5 {t('min') || 'min'}</Typography>
-                  </Box>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 4, fontWeight: 500, lineHeight: 1.6 }}>
-                    {t('topicDesc').replace('{topic}', topic.split(' (')[0])}
-                  </Typography>
-                  <Box sx={{ 
-                    mt: 'auto', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1.5, 
-                    color: 'primary.main', 
-                    fontWeight: 900,
-                    fontSize: '1.1rem'
-                  }}>
-                    {t('startModule')} <ArrowIcon />
-                  </Box>
-                </CardContent>
-              </CardActionArea>
-            </ExperimentCard>
-          ))}
+          {topics.map((topic, index) => {
+            const isCompetition = topic === t('topics.competition');
+            return (
+              <ExperimentCard 
+                key={index}
+                sx={isCompetition ? {
+                  background: theme.palette.mode === 'dark' 
+                    ? `linear-gradient(145deg, ${alpha(theme.palette.secondary.main, 0.4)}, ${alpha(theme.palette.background.paper, 0.4)})`
+                    : `linear-gradient(145deg, ${alpha(theme.palette.secondary.light, 0.2)}, #ffffff)`,
+                  borderColor: 'secondary.main',
+                  '&:hover': {
+                    borderColor: 'secondary.main',
+                    boxShadow: `0 20px 40px -10px ${alpha(theme.palette.secondary.main, 0.4)}`,
+                  }
+                } : {}}
+              >
+                <CardActionArea onClick={() => handleStartSimulation(topic)} sx={{ height: '100%', p: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                  <IconWrapper sx={isCompetition ? { background: theme.palette.secondary.main } : {}}>
+                    {isCompetition ? <TrophyIcon sx={{ fontSize: 32 }} /> : <ScienceIcon sx={{ fontSize: 32 }} />}
+                  </IconWrapper>
+                  <CardContent sx={{ p: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 900, mb: 1, lineHeight: 1.1, fontSize: '1.8rem' }}>
+                      {topic}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5, color: 'text.secondary' }}>
+                      <TimeIcon sx={{ fontSize: 18 }} />
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>{isCompetition ? '???' : `5 ${t('min') || 'min'}`}</Typography>
+                    </Box>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 4, fontWeight: 500, lineHeight: 1.6 }}>
+                      {isCompetition 
+                        ? (language === 'tr' ? 'Fen Bilimleri Olimpiyatı\'na hoş geldiniz! Bilgini test et ve takımını zafere taşı.' : 'Welcome to the Science Olympiad! Test your knowledge and lead your team to victory.')
+                        : t('topicDesc').replace('{topic}', topic.split(' (')[0])
+                      }
+                    </Typography>
+                    <Box sx={{ 
+                      mt: 'auto', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1.5, 
+                      color: isCompetition ? 'secondary.main' : 'primary.main', 
+                      fontWeight: 900,
+                      fontSize: '1.1rem'
+                    }}>
+                      {t('startModule')} <ArrowIcon />
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+              </ExperimentCard>
+            );
+          })}
         </Box>
       </Container>
     );
@@ -304,7 +333,7 @@ const GradeView: React.FC = () => {
             color: 'white',
             borderBottomLeftRadius: '20px'
           }}>
-            <Typography variant="overline" sx={{ fontWeight: 900, fontSize: '0.8rem', letterSpacing: 1 }}>{t('missionFile')}</Typography>
+            <Typography variant="overline" sx={{ fontWeight: 900, fontSize: '0.8rem', letterSpacing: 1, color: '#ffffff' }}>{t('missionFile')}</Typography>
           </Box>
           
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -374,38 +403,40 @@ const GradeView: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Simulation Toolbar */}
-      <Paper elevation={0} sx={{ p: 2, px: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'background.paper', zIndex: 10 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => setViewState('list')} size="small">
-                <CloseIcon />
-            </IconButton>
-            <Typography variant="h6" sx={{ fontWeight: 900 }}>{activeTopic}</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button 
-                variant="outlined" 
-                startIcon={<NotebookIcon />} 
-                onClick={() => setNotebookOpen(true)}
-                sx={{ borderRadius: 10, fontWeight: 700, px: 3 }}
-            >
-                {t('labNotebook')}
-            </Button>
-            {!missionComplete && (
-                <Button 
-                    variant="contained" 
-                    color="success" 
-                    startIcon={<CheckIcon />} 
-                    onClick={handleComplete}
-                    sx={{ borderRadius: 10, fontWeight: 900, px: 3 }}
-                >
-                    {t('finishMission')}
-                </Button>
-            )}
-        </Box>
-      </Paper>
+      {activeTopic !== t('topics.competition') && viewState === 'simulation' && (
+        <Paper elevation={0} sx={{ p: 2, px: 4, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'background.paper', zIndex: 10 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconButton onClick={() => setViewState('list')} size="small">
+                  <CloseIcon />
+              </IconButton>
+              <Typography variant="h6" sx={{ fontWeight: 900 }}>{activeTopic}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button 
+                  variant="outlined" 
+                  startIcon={<NotebookIcon />} 
+                  onClick={() => setNotebookOpen(true)}
+                  sx={{ borderRadius: 10, fontWeight: 700, px: 3 }}
+              >
+                  {t('labNotebook')}
+              </Button>
+              {!missionComplete && (
+                  <Button 
+                      variant="contained" 
+                      color="success" 
+                      startIcon={<CheckIcon />} 
+                      onClick={handleComplete}
+                      sx={{ borderRadius: 10, fontWeight: 900, px: 3 }}
+                  >
+                      {t('finishMission')}
+                  </Button>
+              )}
+          </Box>
+        </Paper>
+      )}
 
       {/* Main Simulation Area */}
-      <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 4, bgcolor: 'background.default' }}>
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', p: activeTopic === t('topics.competition') ? 0 : 4, bgcolor: 'background.default' }}>
         <Container maxWidth="xl">
             {renderSimulationContent()}
         </Container>

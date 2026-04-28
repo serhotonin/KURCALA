@@ -270,7 +270,10 @@ export const translations = {
       acidBase: 'Asitler ve Bazlar (Sızıntı)',
       pressure: 'Sıvı Basıncı (Baraj Çatlağı)',
       weather: 'İklim ve Hava (OpenWeather Canlı Veri)',
+      competition: 'Büyük Final (Yarışma)',
     },
+
+    remainingExperiments: 'Kalan Deneyler',
 
     // Circuit Simulation
     circuitTitle: 'Dinamik Devre Laboratuvarı',
@@ -562,7 +565,10 @@ export const translations = {
       acidBase: 'Acids and Bases (Leakage)',
       pressure: 'Liquid Pressure (Dam Crack)',
       weather: 'Climate and Weather (OpenWeather Live Data)',
+      competition: 'Grand Finale (Competition)',
     },
+
+    remainingExperiments: 'Remaining Experiments',
 
     // Circuit Simulation
     circuitTitle: 'Dynamic Circuit Laboratory',

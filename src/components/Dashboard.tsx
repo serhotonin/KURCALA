@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -86,6 +87,7 @@ const BadgeCard = styled(Card, {
 const Dashboard: React.FC = () => {
   const { t, language } = useLanguage();
   const theme = useTheme();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
   const [notes, setNotes] = useState<LabNote[]>([]);
   const [progress, setProgress] = useState<ModuleProgress[]>([]);
@@ -138,6 +140,10 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  const handleNavigateToExperiment = (grade: number, topic: string) => {
+    navigate(`/grade/${grade}`, { state: { activeTopic: topic } });
+  };
+
   // Badge earned logic
   const isEarned = (topic: string) => Array.isArray(progress) && progress.some(p => p.topic.toLowerCase().includes(topic.toLowerCase()) && p.completed);
 
@@ -155,21 +161,17 @@ const Dashboard: React.FC = () => {
     { label: t('activeDays'), value: stats ? stats.activeDays : 1, icon: <TimelineIcon color="primary" /> },
   ];
 
-  const gradeProgress = [5, 6, 7, 8].map(grade => {
-    const gradeModules = Array.isArray(progress) ? progress.filter(p => p.grade === grade) : [];
-    const totalModules = 2;
-    const totalScore = gradeModules.reduce((acc, curr) => acc + curr.score, 0);
-    const percentage = (totalScore / (totalModules * 100)) * 100;
-    
-    const labels: Record<number, string> = {
-      5: t('grade5Topic'),
-      6: t('grade6Topic'),
-      7: t('grade7Topic'),
-      8: t('grade8Topic'),
-    };
+  const allExperiments = [
+    { grade: 5, topic: t('topics.circuits') },
+    { grade: 6, topic: t('topics.solar') },
+    { grade: 7, topic: t('topics.mixtures') },
+    { grade: 8, topic: t('topics.weather') },
+    { grade: 8, topic: t('topics.competition') },
+  ];
 
-    return { label: labels[grade], value: Math.round(percentage) };
-  });
+  const remainingExperiments = allExperiments.filter(exp => 
+    !Array.isArray(progress) || !progress.some(p => p.topic === exp.topic && p.completed)
+  );
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -220,14 +222,43 @@ const Dashboard: React.FC = () => {
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1.2fr' }, gap: 4 }}>
         <Card sx={{ p: 4, borderRadius: 5 }}>
           <Typography variant="h6" sx={{ mb: 4, fontWeight: 900 }}>{t('trainingProgress')}</Typography>
-          <Stack spacing={4}>
-            {gradeProgress.map((item) => (
-              <Box key={item.label}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 800 }}>{item.label}</Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 800 }}>{item.value}%</Typography>
+          <Stack spacing={2}>
+            {remainingExperiments.length === 0 ? (
+              <Box sx={{ py: 4, textAlign: 'center', opacity: 0.5 }}>
+                <CompletedIcon sx={{ fontSize: 48, mb: 1, color: 'success.main' }} />
+                <Typography variant="body2" sx={{ fontWeight: 800 }}>{language === 'tr' ? 'Tüm deneyler tamamlandı!' : 'All experiments completed!'}</Typography>
+              </Box>
+            ) : remainingExperiments.map((exp, index) => (
+              <Box 
+                key={index} 
+                onClick={() => handleNavigateToExperiment(exp.grade, exp.topic)}
+                sx={{ 
+                  p: 2, 
+                  borderRadius: 3, 
+                  bgcolor: alpha(theme.palette.primary.main, 0.05),
+                  border: '1px solid',
+                  borderColor: alpha(theme.palette.primary.main, 0.1),
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    transform: 'translateX(8px)',
+                    borderColor: 'primary.main'
+                  }
+                }}
+              >
+                <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, fontSize: '0.8rem', fontWeight: 900 }}>
+                  {exp.grade}
+                </Avatar>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 800 }}>{exp.topic}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                    {exp.grade}. {language === 'tr' ? 'Sınıf Müfredatı' : 'Grade Curriculum'}
+                  </Typography>
                 </Box>
-                <LinearProgress variant="determinate" value={item.value} sx={{ height: 10, borderRadius: 5, bgcolor: alpha(theme.palette.primary.main, 0.1) }} />
               </Box>
             ))}
           </Stack>
