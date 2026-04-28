@@ -8,8 +8,6 @@ export const translations = {
     grade6: '6. Sınıf',
     grade7: '7. Sınıf',
     grade8: '8. Sınıf',
-    aiAssistant: 'YAPAY ZEKA',
-    geminiAssistant: 'Gemini Asistan',
     notifications: 'Bildirimler',
     settings: 'Ayarlar',
     contactUs: 'İletişim',
@@ -21,7 +19,6 @@ export const translations = {
     activeExperiments: 'Aktif Deneyler',
     completedTasks: 'Tamamlanan Görevler',
     averageSuccess: 'Ortalama Başarı',
-    aiSupport: 'AI Desteği',
     recentActivity: 'Son Aktiviteler',
     startExperiment: 'Deneye Başla',
     totalStudy: 'Toplam Çalışma',
@@ -69,18 +66,6 @@ export const translations = {
     // Notifications
     notificationUpdates: 'KURCALA sisteminden gelen son güncellemeler.',
     noNewNotifications: 'Yeni bildiriminiz bulunmamaktadır.',
-    
-    // Gemini Chat
-    aiAssistantTitle: 'Yapay Zeka Asistanı',
-    aiAssistantDesc: 'Bilimsel sorgularınız için akıllı rehberiniz.',
-    aiWelcome: 'Merhaba! Ben KURCALA Yapay Zeka Asistanı. Laboratuvar çalışmalarınızda size rehberlik etmek için buradayım. Hangi konuda yardıma ihtiyacınız var?',
-    typeMessage: 'Araştırmak istediğiniz konuyu yazın...',
-    socraticMode: 'Rehber Modu',
-    clearChat: 'Temizle',
-    chatCleared: 'Sohbet geçmişi temizlendi. Yeni bir soru sorabilirsiniz.',
-    assistantTyping: 'Asistan yanıt hazırlıyor...',
-    errorConnection: 'Sunucuyla bağlantı kurulamadı.',
-    errorLabel: 'Hata',
     
     // Contact
     contactTitle: 'Bizimle İletişime Geçin',
@@ -304,8 +289,6 @@ export const translations = {
     grade6: 'Grade 6',
     grade7: 'Grade 7',
     grade8: 'Grade 8',
-    aiAssistant: 'AI ASSISTANT',
-    geminiAssistant: 'Gemini Assistant',
     notifications: 'Notifications',
     settings: 'Settings',
     contactUs: 'Contact Us',
@@ -317,7 +300,6 @@ export const translations = {
     activeExperiments: 'Active Experiments',
     completedTasks: 'Completed Tasks',
     averageSuccess: 'Average Success',
-    aiSupport: 'AI Support',
     recentActivity: 'Recent Activity',
     startExperiment: 'Start Experiment',
     totalStudy: 'Total Study',
@@ -364,18 +346,6 @@ export const translations = {
     // Notifications
     notificationUpdates: 'Recent updates from the KURCALA system.',
     noNewNotifications: 'You have no new notifications.',
-    
-    // Gemini Chat
-    aiAssistantTitle: 'AI Assistant',
-    aiAssistantDesc: 'Your intelligent guide for scientific queries.',
-    aiWelcome: 'Hello! I am KURCALA AI Assistant. I am here to guide you in your laboratory work. How can I help you?',
-    typeMessage: 'Type the topic you want to research...',
-    socraticMode: 'Guide Mode',
-    clearChat: 'Clear',
-    chatCleared: 'Chat history cleared. You can ask a new question.',
-    assistantTyping: 'Assistant is preparing a response...',
-    errorConnection: 'Could not connect to the server.',
-    errorLabel: 'Error',
     
     // Contact
     contactTitle: 'Contact Us',

@@ -98,12 +98,12 @@ const Dashboard: React.FC = () => {
   const [editO, setEditO] = useState('');
 
   const refreshData = () => {
-    fetch('http://localhost:3001/api/stats')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/stats`)
       .then(res => res.ok ? res.json() : null)
       .then(data => data && setStats(data))
       .catch(err => console.error(err));
       
-    fetch('http://localhost:3001/api/progress/all')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/progress/all`)
       .then(res => res.ok ? res.json() : [])
       .then(data => Array.isArray(data) ? setProgress(data) : setProgress([]))
       .catch(err => {
@@ -111,7 +111,7 @@ const Dashboard: React.FC = () => {
         setProgress([]);
       });
 
-    fetch('http://localhost:3001/api/notes/all')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notes/all`)
       .then(res => res.ok ? res.json() : [])
       .then(data => Array.isArray(data) ? setNotes(data) : setNotes([]))
       .catch(err => console.error(err));
@@ -123,14 +123,14 @@ const Dashboard: React.FC = () => {
 
   const handleDeleteNote = (id: number) => {
     if (window.confirm(language === 'tr' ? 'Bu notu silmek istediğinize emin misiniz?' : 'Are you sure you want to delete this note?')) {
-      fetch(`http://localhost:3001/api/notes/${id}`, { method: 'DELETE' })
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notes/${id}`, { method: 'DELETE' })
         .then(() => refreshData());
     }
   };
 
   const handleUpdateNote = () => {
     if (!editingNote) return;
-    fetch(`http://localhost:3001/api/notes/${editingNote.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notes/${editingNote.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hypothesis: editH, observation: editO }),
@@ -273,7 +273,7 @@ const Dashboard: React.FC = () => {
                 color="error" 
                 onClick={() => {
                   if (window.confirm(language === 'tr' ? 'Tüm notları silmek istediğinize emin misiniz?' : 'Are you sure you want to clear all notes?')) {
-                    fetch('http://localhost:3001/api/notes/all', { method: 'DELETE' }).then(() => refreshData());
+                    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notes/all`, { method: 'DELETE' }).then(() => refreshData());
                   }
                 }}
                 sx={{ fontWeight: 800, textTransform: 'none', mr: 1 }}

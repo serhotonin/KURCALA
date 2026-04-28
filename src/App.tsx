@@ -5,7 +5,6 @@ import { ThemeContextProvider } from './ThemeContext';
 import { LanguageProvider } from './LanguageContext';
 import Sidebar from './components/Sidebar';
 import GradeView from './components/GradeView';
-import GeminiChat from './components/GeminiChat';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
 import Contact from './components/Contact';
@@ -41,7 +40,6 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/grade/:gradeId" element={<GradeView />} />
-              <Route path="/gemini" element={<GeminiChat />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<Navigate to="/" replace />} />

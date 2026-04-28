@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import {
   School as SchoolIcon,
-  Psychology as GeminiIcon,
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
   NotificationsNone as NotificationsIcon,
@@ -232,49 +231,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                 </ListItem>
               </Tooltip>
             ))}
-          </List>
-
-          {!collapsed && (
-            <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, ml: 2, mt: 2, display: 'block' }}>
-              {t('aiAssistant')}
-            </Typography>
-          )}
-          <List>
-            <Tooltip title={collapsed ? t('geminiAssistant') : ''} placement="right">
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => navigate('/gemini')}
-                  selected={location.pathname === '/gemini'}
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: collapsed ? 'center' : 'initial',
-                    borderRadius: 3,
-                    px: 2.5,
-                    bgcolor: location.pathname === '/gemini' ? 'primary.main' : 'transparent',
-                    color: location.pathname === '/gemini' ? 'white' : 'inherit',
-                    '&:hover': {
-                      bgcolor: location.pathname === '/gemini' ? 'primary.dark' : 'action.hover',
-                    },
-                    '& .MuiListItemIcon-root': {
-                      color: location.pathname === '/gemini' ? 'white' : 'inherit',
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: 'center' }}>
-                    <GeminiIcon />
-                  </ListItemIcon>
-                  {!collapsed && (
-                    <ListItemText 
-                      primary={
-                        <Typography variant="body1" sx={{ fontWeight: 800, opacity: 1 }}>
-                          {t('geminiAssistant')}
-                        </Typography>
-                      } 
-                    />
-                  )}
-                </ListItemButton>
-              </ListItem>
-            </Tooltip>
           </List>
 
           {/* Moved Platform Options into the scrollable list */}

@@ -143,7 +143,7 @@ const WeatherSimulation: React.FC<{ sandbox?: boolean }> = ({ sandbox }) => {
     setSubmitted(false);
     setAnswers({});
     try {
-      const response = await fetch('http://localhost:3001/api/weather/compare');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/weather/compare`);
       const result = await response.json();
       if (result.error) throw new Error(result.error);
       setData(result);

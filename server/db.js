@@ -70,7 +70,6 @@ if (statsCount.count === 0) {
 
   db.prepare('INSERT INTO Notifications (message) VALUES (?)').run('KURCALA Laboratuvarlarına hoş geldiniz!');
   db.prepare('INSERT INTO Notifications (message) VALUES (?)').run('8. Sınıf müfredatı güncellendi.');
-  db.prepare('INSERT INTO Notifications (message) VALUES (?)').run('Yeni Gemini Asistan özelliği yayına alındı.');
 
   db.prepare('INSERT INTO Settings (theme) VALUES (?)').run('light');
 } else {

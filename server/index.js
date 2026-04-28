@@ -4,16 +4,13 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, param, validationResult } = require('express-validator');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const db = require('./db');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// --- AI Setup ---
-console.log('API Key present:', !!process.env.VITE_GEMINI_API_KEY);
-const genAI = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY);
+// --- API Setup ---
 const WEATHER_API_KEY = process.env.VITE_OPENWEATHER_API_KEY;
 
 const TURKISH_CITIES = [
@@ -30,7 +27,7 @@ app.use(helmet({
 
 // 2. Controlled CORS
 const corsOptions = {
-  origin: '*',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
@@ -44,13 +41,6 @@ const globalLimiter = rateLimit({
   message: { error: 'Çok fazla istek yapıldı, lütfen daha sonra tekrar deneyin.' }
 });
 app.use('/api/', globalLimiter);
-
-// Special AI Limiter
-const aiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 5,
-  message: { error: 'Yapay zeka kullanımı dakikada 5 mesajla sınırlandırılmıştır.' }
-});
 
 // 4. Validation Middleware
 const validate = (req, res, next) => {
@@ -231,57 +221,6 @@ app.get('/api/weather/compare', async (req, res) => {
   }
 });
 
-// SECURE AI CHAT PROXY
-app.post('/api/ai/chat', [
-  aiLimiter,
-  body('message').isString().notEmpty().trim().escape(),
-  body('history').isArray(),
-  body('socratic').isBoolean(),
-  validate
-], async (req, res) => {
-  console.log('Received AI chat request:', req.body.message);
-  
-  if (!process.env.VITE_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-    return res.status(500).json({ error: 'Yapay zeka API anahtarı yapılandırılmamış.' });
-  }
-
-  try {
-    const { message, history, socratic } = req.body;
-    
-    console.log('Starting chat with model gemini-1.5-flash');
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const chat = model.startChat({
-      history: history.map(m => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.text }],
-      })),
-    });
-
-    const promptToSend = socratic 
-      ? `ÖNEMLİ: Sen KURCALA Labs'in bilimsel rehberisin. 
-         TEMEL KURALLAR:
-         1. ASLA doğrudan cevap verme. 
-         2. Öğrenciye cevabı bulduracak sorular sor.
-         3. Zararlı veya etik dışı hiçbir içerik üretme.
-         4. Sadece fen bilimleri ve deneylerle ilgili konularda yardımcı ol.
-         5. Yanıtların kısa, teşvik edici ve merak uyandırıcı olsun.
-         Öğrencinin sorusu: ${message}`
- 
-      : `Sen KURCALA Labs bilim asistanısın. Kısa ve bilimsel gerçeklere dayalı cevaplar ver. Zararlı içerikten kaçın. Soru: ${message}`;
-
-    console.log('Sending message to Gemini...');
-    const result = await chat.sendMessage(promptToSend);
-    console.log('Gemini responded.');
-    const response = await result.response;
-    const text = response.text();
-
-    res.json({ text });
-  } catch (err) {
-    console.error("AI Proxy Error DETAILED:", err);
-    res.status(500).json({ error: 'Yapay zeka servisine erişilemiyor.' });
-  }
-});
-
 app.get('/api/notes/all', (req, res) => {
   try {
     const notes = db.prepare('SELECT id, topic, hypothesis, observation, timestamp FROM LabNotes ORDER BY timestamp DESC').all();
@@ -359,12 +298,11 @@ app.post('/api/notes', [
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // All other GET requests not handled before will return the React app
-app.get('*', (req, res) => {
-  if (!req.url.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
+app.get(/(.*)/, (req, res) => {
+  if (req.url.startsWith('/api')) {
+    res.status(404).json({ error: 'API endpoint not found' });
   } else {
-    console.log('404 on API route:', req.url);
-    res.status(404).json({ error: 'API route not found' });
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
   }
 });
 

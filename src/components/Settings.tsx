@@ -29,7 +29,7 @@ const Settings: React.FC = () => {
   const [emailNotify, setEmailNotify] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/settings')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings`)
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
         if (data) {
@@ -42,7 +42,7 @@ const Settings: React.FC = () => {
   const handleToggleEmail = () => {
     const newVal = !emailNotify;
     setEmailNotify(newVal);
-    fetch('http://localhost:3001/api/settings', {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ theme: mode, emailNotifications: newVal }),

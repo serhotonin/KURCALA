@@ -309,7 +309,7 @@ const GradeView: React.FC = () => {
   const [savingNote, setSavingNote] = useState(false);
 
   const fetchNotes = (topic: string) => {
-    fetch(`http://localhost:3001/api/notes/${encodeURIComponent(topic)}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notes/${encodeURIComponent(topic)}`)
       .then(res => res.json())
       .then(data => setPrevNotes(data))
       .catch(err => console.error(err));
@@ -318,7 +318,7 @@ const GradeView: React.FC = () => {
   const saveNote = () => {
     if (!activeTopic) return;
     setSavingNote(true);
-    fetch('http://localhost:3001/api/notes', {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ topic: activeTopic, hypothesis, observation }),
@@ -349,7 +349,7 @@ const GradeView: React.FC = () => {
     setMissionComplete(true);
     
     // Save progress to backend
-    fetch('http://localhost:3001/api/progress', {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/progress`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

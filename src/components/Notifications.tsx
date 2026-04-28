@@ -30,7 +30,7 @@ const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const fetchNotifications = () => {
-    fetch('http://localhost:3001/api/notifications')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications`)
       .then((res) => res.json())
       .then((data) => setNotifications(data))
       .catch((err) => console.error('Failed to fetch notifications:', err));
@@ -41,7 +41,7 @@ const Notifications: React.FC = () => {
   }, []);
 
   const markAsRead = (id: number) => {
-    fetch(`http://localhost:3001/api/notifications/${id}/read`, { method: 'POST' })
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications/${id}/read`, { method: 'POST' })
       .then(() => fetchNotifications())
       .catch((err) => console.error('Failed to mark notification as read:', err));
   };

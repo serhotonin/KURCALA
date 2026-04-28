@@ -15,7 +15,7 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [mode, setMode] = useState<ThemeMode>('light');
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/settings')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && data.theme) setMode(data.theme);
@@ -26,7 +26,7 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const toggleTheme = () => {
     const newMode = mode === 'light' ? 'dark' : 'light';
     setMode(newMode);
-    fetch('http://localhost:3001/api/settings', {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ theme: newMode, emailNotifications: true }),
